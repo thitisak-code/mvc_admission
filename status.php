@@ -205,6 +205,9 @@ function getStatusBadge($status) {
         </div>
       </a>
       <div class="d-flex align-items-center gap-2 flex-wrap">
+        <a href="programs.php" class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-mortarboard me-1"></i> สาขาวิชาที่เปิดรับ
+        </a>
         <a href="register.php" class="btn btn-outline-secondary btn-sm">
           <i class="bi bi-pencil-square me-1"></i> สมัครเรียนออนไลน์
         </a>

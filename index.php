@@ -806,10 +806,160 @@ $user_citizen_id = $_SESSION['citizen_id'] ?? '';
       transform: translateY(-3px);
       box-shadow: 0 12px 28px rgba(139, 30, 43, 0.45);
     }
+
+    /* ==========================================================================
+       Preloader with Logo (หน้าโหลดพร้อมโลโก้วิทยาลัย)
+       ========================================================================== */
+    .preloader-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: radial-gradient(circle at center, #FFFFFF 0%, #F8FAFC 100%);
+      z-index: 99999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 0.35s ease, visibility 0.35s ease;
+    }
+
+    .preloader-overlay.fade-out {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .preloader-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .preloader-logo-wrap {
+      position: relative;
+      width: 104px;
+      height: 104px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .preloader-pulse-ring {
+      position: absolute;
+      top: -6px;
+      left: -6px;
+      right: -6px;
+      bottom: -6px;
+      border-radius: 50%;
+      border: 2.5px solid var(--color-primary);
+      opacity: 0.8;
+      animation: preloaderPulse 1.8s infinite cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    .preloader-logo {
+      width: 90px;
+      height: 90px;
+      aspect-ratio: 1 / 1;
+      object-fit: contain;
+      border-radius: 50%;
+      padding: 6px;
+      background: #FFFFFF;
+      box-shadow: 0 8px 24px rgba(139, 30, 43, 0.15);
+      animation: preloaderBreathing 2s infinite ease-in-out;
+      position: relative;
+      z-index: 2;
+    }
+
+    @keyframes preloaderPulse {
+      0% {
+        transform: scale(0.9);
+        opacity: 0.8;
+      }
+      50% {
+        transform: scale(1.18);
+        opacity: 0.2;
+      }
+      100% {
+        transform: scale(1.35);
+        opacity: 0;
+      }
+    }
+
+    @keyframes preloaderBreathing {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.06);
+      }
+    }
+
+    .preloader-title {
+      font-weight: 700;
+      color: var(--color-primary-deep);
+      font-size: 1.1rem;
+      letter-spacing: -0.2px;
+    }
+
+    .preloader-subtitle {
+      font-weight: 500;
+      font-size: 0.85rem;
+      color: #64748B;
+    }
+
+    .preloader-spinner-bar {
+      width: 140px;
+      height: 4px;
+      background: #E2E8F0;
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+      margin-top: 8px;
+    }
+
+    .preloader-progress {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 45%;
+      background: linear-gradient(90deg, var(--color-primary), #EA5455);
+      border-radius: 4px;
+      animation: preloaderSlide 1.2s infinite ease-in-out;
+    }
+
+    @keyframes preloaderSlide {
+      0% {
+        left: -45%;
+      }
+      100% {
+        left: 100%;
+      }
+    }
   </style>
 </head>
 
 <body>
+
+  <!-- Preloader with College Logo -->
+  <div id="preloader" class="preloader-overlay">
+    <div class="preloader-content text-center">
+      <div class="preloader-logo-wrap">
+        <div class="preloader-pulse-ring"></div>
+        <img src="<?= htmlspecialchars($hp['site_logo']) ?>" alt="ตราสัญลักษณ์ วิทยาลัยอาชีวศึกษามหาสารคาม" class="preloader-logo" onerror="this.src='img/Logo-W.png'">
+      </div>
+      <h6 class="preloader-title mt-3 mb-1"><?= htmlspecialchars($hp['navbar_title']) ?></h6>
+      <p class="preloader-subtitle small mb-2"><?= htmlspecialchars($hp['navbar_subtitle']) ?></p>
+      <div class="preloader-spinner-bar">
+        <div class="preloader-progress"></div>
+      </div>
+    </div>
+  </div>
 
   <!-- Top Announcement Bar (เน้นสีแดงสถาบัน Deep Crimson #6F1420) -->
   <header class="topbar py-2">
@@ -854,6 +1004,9 @@ $user_citizen_id = $_SESSION['citizen_id'] ?? '';
         <ul class="navbar-nav ms-auto gap-lg-1 align-items-lg-center">
           <li class="nav-item">
             <a class="nav-link active" href="index.php"><i class="bi bi-house-door me-1"></i> หน้าแรก</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="programs.php"><i class="bi bi-mortarboard me-1"></i> สาขาวิชาที่เปิดรับ</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="register.php"><i class="bi bi-pencil-square me-1"></i> สมัครเรียนออนไลน์</a>
@@ -953,7 +1106,11 @@ $user_citizen_id = $_SESSION['citizen_id'] ?? '';
                   <i class="bi bi-arrow-right"></i>
                 </a>
               <?php endif; ?>
-              <?php if (!empty($hp['hero_btn2_text'])): ?>
+              <a href="programs.php" class="btn-outline-red">
+                <i class="bi bi-mortarboard-fill"></i>
+                <span>เช็คสาขาวิชาที่เปิดรับ</span>
+              </a>
+              <?php if (!empty($hp['hero_btn2_text']) && $hp['hero_btn2_link'] !== 'programs.php'): ?>
                 <a href="<?= htmlspecialchars($hp['hero_btn2_link']) ?>" class="btn-outline-red">
                   <i class="bi bi-journal-text"></i>
                   <span><?= htmlspecialchars($hp['hero_btn2_text']) ?></span>
@@ -1251,6 +1408,19 @@ $user_citizen_id = $_SESSION['citizen_id'] ?? '';
       }
       return true;
     }
+
+    // Preloader Controller
+    function hidePreloader() {
+      const loader = document.getElementById('preloader');
+      if (loader && !loader.classList.contains('fade-out')) {
+        loader.classList.add('fade-out');
+        setTimeout(() => {
+          if (loader && loader.parentNode) loader.parentNode.removeChild(loader);
+        }, 400);
+      }
+    }
+    window.addEventListener('load', hidePreloader);
+    setTimeout(hidePreloader, 900);
   </script>
 </body>
 </html>

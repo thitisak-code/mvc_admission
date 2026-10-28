@@ -70,6 +70,23 @@ if (empty($majors)) {
     $majors = $stmt_majors_all->fetchAll(PDO::FETCH_ASSOC);
 }
 
+// ตรวจสอบการเลือกสาขาวิชาล่วงหน้าจากหน้า programs.php
+$preselected_major_id = isset($_GET['major_id']) ? (int)$_GET['major_id'] : 0;
+$preselected_level_id = isset($_GET['level_id']) ? (int)$_GET['level_id'] : 0;
+$selected_major_info  = null;
+
+if ($preselected_major_id > 0) {
+    foreach ($majors as $m) {
+        if ((int)$m['major_id'] === $preselected_major_id) {
+            $selected_major_info = $m;
+            if (!$preselected_level_id && !empty($m['level_id'])) {
+                $preselected_level_id = (int)$m['level_id'];
+            }
+            break;
+        }
+    }
+}
+
 $is_logged_in    = isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
 $user_type       = $_SESSION['user_type'] ?? '';
 $user_name       = $_SESSION['user_name'] ?? '';
@@ -653,12 +670,12 @@ $logged_user_name = $is_admin ? ($user_name ?: ($_SESSION['admin_name'] ?? 'Admi
         /* Custom Level Radio Buttons */
         .level-radio-group {
             display: flex;
-            gap: 25px;
+            gap: 12px;
             align-items: center;
             flex-wrap: wrap;
-            padding: 10px 15px;
+            padding: 8px;
             background: #f8fafc;
-            border-radius: 8px;
+            border-radius: 10px;
             border: 1px solid #e2e8f0;
         }
 
@@ -669,18 +686,34 @@ $logged_user_name = $is_admin ? ($user_name ?: ($_SESSION['admin_name'] ?? 'Admi
             font-weight: 600;
             font-size: 0.95rem;
             color: #475569;
-            cursor: not-allowed;
+            cursor: pointer;
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: 1.5px solid transparent;
+            background: #ffffff;
+            transition: all 0.2s ease;
+            user-select: none;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+        }
+
+        .level-radio-item:hover {
+            border-color: #cbd5e1;
+            background-color: #f1f5f9;
         }
 
         .level-radio-item input[type="radio"] {
             width: 18px;
             height: 18px;
-            accent-color: #3b82f6;
-            cursor: not-allowed;
+            accent-color: var(--color-primary);
+            cursor: pointer;
         }
 
         .level-radio-item.selected {
-            color: var(--mvc-blue);
+            color: var(--color-primary-deep);
+            background: var(--color-primary-tint);
+            border-color: var(--color-primary);
+            font-weight: 700;
+            box-shadow: 0 2px 6px rgba(139, 30, 43, 0.12);
         }
 
         /* PVS Options Cards */
@@ -976,9 +1009,140 @@ $logged_user_name = $is_admin ? ($user_name ?: ($_SESSION['admin_name'] ?? 'Admi
                 height: 40px;
             }
         }
+
+        /* Preloader with College Logo */
+        .preloader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at center, #FFFFFF 0%, #F8FAFC 100%);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.35s ease, visibility 0.35s ease;
+        }
+
+        .preloader-overlay.fade-out {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .preloader-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .preloader-logo-wrap {
+            position: relative;
+            width: 104px;
+            height: 104px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preloader-pulse-ring {
+            position: absolute;
+            top: -6px;
+            left: -6px;
+            right: -6px;
+            bottom: -6px;
+            border-radius: 50%;
+            border: 2.5px solid var(--color-primary);
+            opacity: 0.8;
+            animation: preloaderPulse 1.8s infinite cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .preloader-logo {
+            width: 90px;
+            height: 90px;
+            aspect-ratio: 1 / 1;
+            object-fit: contain;
+            border-radius: 50%;
+            padding: 6px;
+            background: #FFFFFF;
+            box-shadow: 0 8px 24px rgba(139, 30, 43, 0.15);
+            animation: preloaderBreathing 2s infinite ease-in-out;
+            position: relative;
+            z-index: 2;
+        }
+
+        @keyframes preloaderPulse {
+            0% { transform: scale(0.9); opacity: 0.8; }
+            50% { transform: scale(1.18); opacity: 0.2; }
+            100% { transform: scale(1.35); opacity: 0; }
+        }
+
+        @keyframes preloaderBreathing {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.06); }
+        }
+
+        .preloader-title {
+            font-weight: 700;
+            color: var(--color-primary-deep);
+            font-size: 1.1rem;
+            letter-spacing: -0.2px;
+        }
+
+        .preloader-subtitle {
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: #64748B;
+        }
+
+        .preloader-spinner-bar {
+            width: 140px;
+            height: 4px;
+            background: #E2E8F0;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+            margin-top: 8px;
+        }
+
+        .preloader-progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 45%;
+            background: linear-gradient(90deg, var(--color-primary), #EA5455);
+            border-radius: 4px;
+            animation: preloaderSlide 1.2s infinite ease-in-out;
+        }
+
+        @keyframes preloaderSlide {
+            0% { left: -45%; }
+            100% { left: 100%; }
+        }
     </style>
 </head>
 <body>
+
+    <!-- Preloader with College Logo -->
+    <div id="preloader" class="preloader-overlay">
+        <div class="preloader-content text-center">
+            <div class="preloader-logo-wrap">
+                <div class="preloader-pulse-ring"></div>
+                <img src="<?= htmlspecialchars($hp['site_logo']) ?>" alt="ตราสัญลักษณ์ วิทยาลัยอาชีวศึกษามหาสารคาม" class="preloader-logo" onerror="this.src='img/Logo-W.png'">
+            </div>
+            <h6 class="preloader-title mt-3 mb-1"><?= htmlspecialchars($hp['navbar_title']) ?></h6>
+            <p class="preloader-subtitle small mb-2"><?= htmlspecialchars($hp['navbar_subtitle']) ?></p>
+            <div class="preloader-spinner-bar">
+                <div class="preloader-progress"></div>
+            </div>
+        </div>
+    </div>
 
     <!-- Topbar (จาก index.php) -->
     <div class="topbar">
@@ -1021,6 +1185,7 @@ $logged_user_name = $is_admin ? ($user_name ?: ($_SESSION['admin_name'] ?? 'Admi
             <div class="collapse navbar-collapse" id="mainNav">
                 <ul class="navbar-nav ms-auto align-items-lg-center gap-1 mt-3 mt-lg-0">
                     <li class="nav-item"><a class="nav-link" href="index.php"><i class="bi bi-house-door me-1"></i> หน้าแรก</a></li>
+                    <li class="nav-item"><a class="nav-link" href="programs.php"><i class="bi bi-mortarboard me-1"></i> สาขาวิชาที่เปิดรับ</a></li>
                     <li class="nav-item"><a class="nav-link active" href="register.php"><i class="bi bi-pencil-square me-1"></i> สมัครเรียนออนไลน์</a></li>
                     <li class="nav-item"><a class="nav-link" href="status.php"><i class="bi bi-search me-1"></i> ตรวจสอบสถานะ</a></li>
                     <li class="nav-item"><a class="nav-link" href="print_application.php"><i class="bi bi-printer me-1"></i> พิมพ์ใบสมัคร</a></li>
@@ -1079,6 +1244,12 @@ $logged_user_name = $is_admin ? ($user_name ?: ($_SESSION['admin_name'] ?? 'Admi
                         </a>
                     </li>
                     <li class="sidebar-nav-item">
+                        <a href="programs.php" class="sidebar-nav-link">
+                            <i class="fa-solid fa-graduation-cap"></i>
+                            <span>สาขาวิชาที่เปิดรับ</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
                         <a href="register.php" class="sidebar-nav-link active">
                             <i class="fa-solid fa-envelope-open-text"></i>
                             <span>กรอกใบสมัคร</span>
@@ -1126,6 +1297,31 @@ $logged_user_name = $is_admin ? ($user_name ?: ($_SESSION['admin_name'] ?? 'Admi
                         <input type="hidden" name="academic_year" value="<?= htmlspecialchars($active_year) ?>">
                         <input type="hidden" name="id_card" id="hidden_id_card" value="">
                         <input type="hidden" name="level_id" id="hidden_level_id" value="1">
+
+                        <?php if ($selected_major_info): ?>
+                        <div class="alert alert-success border-2 d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4 p-3 shadow-sm rounded-3" style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-color: #86efac !important;">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-circle text-white d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px; font-size: 1.4rem; background-color: #16a34a; box-shadow: 0 4px 10px rgba(22, 163, 74, 0.25);">
+                                    <i class="bi bi-mortarboard-fill"></i>
+                                </div>
+                                <div>
+                                    <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                                        <span class="badge bg-danger px-2 py-1"><?= htmlspecialchars($selected_major_info['level_name']) ?></span>
+                                        <span class="fw-bold fs-6 text-dark"><?= htmlspecialchars($selected_major_info['major_name']) ?></span>
+                                        <span class="badge bg-light text-secondary border">รหัส <?= htmlspecialchars($selected_major_info['program_code']) ?></span>
+                                    </div>
+                                    <div class="small text-secondary">
+                                        <i class="bi bi-building me-1"></i> <?= htmlspecialchars($selected_major_info['dept_name']) ?> • ระบบได้เลือกสาขานี้ในแบบฟอร์มให้คุณอัตโนมัติแล้ว
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <a href="programs.php" class="btn btn-sm btn-outline-dark bg-white shadow-sm">
+                                    <i class="bi bi-arrow-left-right me-1"></i> เปลี่ยนสาขาวิชา
+                                </a>
+                            </div>
+                        </div>
+                        <?php endif; ?>
 
                         <!-- Round & Quota Select -->
                         <div class="row g-3 mb-4">
@@ -1440,18 +1636,21 @@ $logged_user_name = $is_admin ? ($user_name ?: ($_SESSION['admin_name'] ?? 'Admi
                         <div class="form-section-header">5. ข้อมูลหลักสูตรและสาขาที่ต้องการสมัคร</div>
 
                         <div class="mb-3">
-                            <label class="form-label d-block">เข้าศึกษาต่อในระดับ <span class="text-muted fw-normal small">(ระบบกำหนดให้อัตโนมัติตามระดับการศึกษาเดิมในข้อ 4)</span></label>
+                            <label class="form-label d-block fw-bold" style="color: var(--color-secondary-deep);">
+                                เข้าศึกษาต่อในระดับ <span class="text-danger">*</span>
+                                <span class="text-muted fw-normal small ms-2">(คลิกเลือกระดับที่ต้องการสมัคร หรือเลือกวุฒิเดิมในข้อ 4)</span>
+                            </label>
                             <div class="level-radio-group">
                                 <label class="level-radio-item" id="label_level_1">
-                                    <input type="radio" name="display_level" id="radio_level_1" value="1" disabled checked>
+                                    <input type="radio" name="display_level" id="radio_level_1" value="1" checked>
                                     <span>ประกาศนียบัตรวิชาชีพ (ปวช.)</span>
                                 </label>
                                 <label class="level-radio-item" id="label_level_2">
-                                    <input type="radio" name="display_level" id="radio_level_2" value="2" disabled>
+                                    <input type="radio" name="display_level" id="radio_level_2" value="2">
                                     <span>ประกาศนียบัตรวิชาชีพชั้นสูง (ปวส.)</span>
                                 </label>
                                 <label class="level-radio-item" id="label_level_3">
-                                    <input type="radio" name="display_level" id="radio_level_3" value="3" disabled>
+                                    <input type="radio" name="display_level" id="radio_level_3" value="3">
                                     <span>หลักสูตรเทคโนโลยีบัณฑิต (ทล.บ.)</span>
                                 </label>
                             </div>
@@ -1983,6 +2182,34 @@ $logged_user_name = $is_admin ? ($user_name ?: ($_SESSION['admin_name'] ?? 'Admi
             });
         });
 
+        // อนุญาตให้คลิกเลือกเปลี่ยนระดับการศึกษา (ปวช. / ปวส. / ทล.บ.) ในข้อ 5 ได้โดยตรง
+        document.querySelectorAll('input[name="display_level"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.checked) {
+                    const targetLvl = parseInt(this.value);
+                    setTargetEducationLevel(targetLvl);
+
+                    // ปรับระดับการศึกษาเดิมในข้อ 4 ให้สอดคล้องกันอย่างเหมาะสม
+                    if (targetLvl === 1) {
+                        if (prevLevelSelect.value !== 'ม.3') {
+                            prevLevelSelect.value = 'ม.3';
+                            prevLevelSelect.dispatchEvent(new Event('change'));
+                        }
+                    } else if (targetLvl === 2) {
+                        if (prevLevelSelect.value !== 'ปวช.3' && prevLevelSelect.value !== 'ม.6' && prevLevelSelect.value !== 'กศน.') {
+                            prevLevelSelect.value = 'ปวช.3';
+                            prevLevelSelect.dispatchEvent(new Event('change'));
+                        }
+                    } else if (targetLvl === 3) {
+                        if (prevLevelSelect.value !== 'ปวส.2') {
+                            prevLevelSelect.value = 'ปวส.2';
+                            prevLevelSelect.dispatchEvent(new Event('change'));
+                        }
+                    }
+                }
+            });
+        });
+
         prevLevelSelect.addEventListener('change', function() {
             const lvl = this.value;
 
@@ -2039,8 +2266,34 @@ $logged_user_name = $is_admin ? ($user_name ?: ($_SESSION['admin_name'] ?? 'Admi
             }
         });
 
-        // กำหนดเริ่มต้น
-        setTargetEducationLevel(1);
+        // ตรวจสอบและเลือกสาขาวิชาล่วงหน้าจาก URL parameters (?major_id=...&level_id=...)
+        const urlParams = new URLSearchParams(window.location.search);
+        const preMajorId = urlParams.get('major_id');
+        const preLevelId = urlParams.get('level_id');
+
+        if (preLevelId || preMajorId) {
+            let targetLvl = parseInt(preLevelId) || 1;
+            if (targetLvl === 1) {
+                prevLevelSelect.value = 'ม.3';
+            } else if (targetLvl === 2) {
+                prevLevelSelect.value = 'ปวช.3';
+            } else if (targetLvl === 3) {
+                prevLevelSelect.value = 'ปวส.2';
+            }
+            prevLevelSelect.dispatchEvent(new Event('change'));
+            setTargetEducationLevel(targetLvl);
+
+            if (preMajorId) {
+                majorSelect.value = preMajorId;
+                majorSelect.classList.add('border-danger', 'border-2', 'shadow-sm');
+                setTimeout(() => {
+                    majorSelect.classList.remove('border-danger', 'border-2', 'shadow-sm');
+                }, 4000);
+            }
+        } else {
+            // กำหนดเริ่มต้น
+            setTargetEducationLevel(1);
+        }
 
         // -------------------------------------------------------------------------
         // 5. แสดงชื่อไฟล์ที่เลือก และ Preview รูปถ่ายหน้าตรง 1 นิ้ว
@@ -2186,6 +2439,19 @@ $logged_user_name = $is_admin ? ($user_name ?: ($_SESSION['admin_name'] ?? 'Admi
         if (sidebarCloseBtn) {
             sidebarCloseBtn.addEventListener('click', closeMobileSidebar);
         }
+
+        // Preloader Controller
+        function hidePreloader() {
+            const loader = document.getElementById('preloader');
+            if (loader && !loader.classList.contains('fade-out')) {
+                loader.classList.add('fade-out');
+                setTimeout(() => {
+                    if (loader && loader.parentNode) loader.parentNode.removeChild(loader);
+                }, 400);
+            }
+        }
+        window.addEventListener('load', hidePreloader);
+        setTimeout(hidePreloader, 900);
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

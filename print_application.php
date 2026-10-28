@@ -809,6 +809,12 @@ $province_clean = $applicant ? valOrDash(preg_replace('/^(จังหวัด|
                         </a>
                     </li>
                     <li class="sidebar-nav-item">
+                        <a href="programs.php" class="sidebar-nav-link">
+                            <i class="fa-solid fa-graduation-cap"></i>
+                            <span>สาขาวิชาที่เปิดรับ</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
                         <a href="register.php" class="sidebar-nav-link">
                             <i class="fa-solid fa-envelope-open-text"></i>
                             <span>กรอกใบสมัคร</span>
