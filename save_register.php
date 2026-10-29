@@ -196,30 +196,69 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $file_transcript = uploadFile('file_transcript', $upload_dir, 'trans_' . $id_card);
         $file_idcard = uploadFile('file_idcard', $upload_dir, 'idcard_' . $id_card);
 
+        // ตรวจสอบและอัปเดตโครงสร้างตาราง applicants ให้มีคอลัมน์ curriculum_type อัตโนมัติ
+        $has_curr_col = true;
+        try {
+            $chk_c = $pdo->query("SHOW COLUMNS FROM `applicants` LIKE 'curriculum_type'")->fetchAll();
+            if (empty($chk_c)) {
+                try {
+                    $pdo->exec("ALTER TABLE `applicants` ADD COLUMN `curriculum_type` VARCHAR(50) NOT NULL DEFAULT 'ระบบปกติ' AFTER `education_level`");
+                    $has_curr_col = true;
+                } catch (Throwable $ex) {
+                    $has_curr_col = false;
+                }
+            }
+        } catch (Throwable $e) {
+            $has_curr_col = false;
+        }
+
         // 9. SQL บันทึกข้อมูลลงตาราง applicants (Unified)
-        $sql = "INSERT INTO applicants 
-                (citizen_id, application_no, round_id, admission_round, quota_type, academic_year, education_level, program_id, pvs_type, curriculum_type,
-                 prefix, first_name, last_name, gender, birthdate, age, nationality, religion,
-                 addr_no, addr_moo, addr_soi, addr_road, addr_subdistrict, addr_district, addr_province, addr_zipcode, address,
-                 phone, email, password,
-                 parent_name, parent_phone,
-                 father_prefix, father_firstname, father_lastname, father_occupation, father_phone,
-                 mother_prefix, mother_firstname, mother_lastname, mother_occupation, mother_phone,
-                 prev_level, previous_school, prev_subdistrict, prev_district, prev_province, prev_zipcode, prev_phone, prev_major, gpa, special_ability,
-                 file_photo, file_transcript, file_idcard, pdpa_consent, status) 
-                VALUES 
-                (:citizen_id, :application_no, :round_id, :admission_round, :quota_type, :academic_year, :education_level, :program_id, :pvs_type, :curriculum_type,
-                 :prefix, :first_name, :last_name, :gender, :birthdate, :age, :nationality, :religion,
-                 :addr_no, :addr_moo, :addr_soi, :addr_road, :addr_subdistrict, :addr_district, :addr_province, :addr_zipcode, :address,
-                 :phone, :email, :password,
-                 :parent_name, :parent_phone,
-                 :father_prefix, :father_firstname, :father_lastname, :father_occupation, :father_phone,
-                 :mother_prefix, :mother_firstname, :mother_lastname, :mother_occupation, :mother_phone,
-                 :prev_level, :previous_school, :prev_subdistrict, :prev_district, :prev_province, :prev_zipcode, :prev_phone, :prev_major, :gpa, :special_ability,
-                 :file_photo, :file_transcript, :file_idcard, :pdpa_consent, 'pending')";
+        if ($has_curr_col) {
+            $sql = "INSERT INTO applicants 
+                    (citizen_id, application_no, round_id, admission_round, quota_type, academic_year, education_level, program_id, pvs_type, curriculum_type,
+                     prefix, first_name, last_name, gender, birthdate, age, nationality, religion,
+                     addr_no, addr_moo, addr_soi, addr_road, addr_subdistrict, addr_district, addr_province, addr_zipcode, address,
+                     phone, email, password,
+                     parent_name, parent_phone,
+                     father_prefix, father_firstname, father_lastname, father_occupation, father_phone,
+                     mother_prefix, mother_firstname, mother_lastname, mother_occupation, mother_phone,
+                     prev_level, previous_school, prev_subdistrict, prev_district, prev_province, prev_zipcode, prev_phone, prev_major, gpa, special_ability,
+                     file_photo, file_transcript, file_idcard, pdpa_consent, status) 
+                    VALUES 
+                    (:citizen_id, :application_no, :round_id, :admission_round, :quota_type, :academic_year, :education_level, :program_id, :pvs_type, :curriculum_type,
+                     :prefix, :first_name, :last_name, :gender, :birthdate, :age, :nationality, :religion,
+                     :addr_no, :addr_moo, :addr_soi, :addr_road, :addr_subdistrict, :addr_district, :addr_province, :addr_zipcode, :address,
+                     :phone, :email, :password,
+                     :parent_name, :parent_phone,
+                     :father_prefix, :father_firstname, :father_lastname, :father_occupation, :father_phone,
+                     :mother_prefix, :mother_firstname, :mother_lastname, :mother_occupation, :mother_phone,
+                     :prev_level, :previous_school, :prev_subdistrict, :prev_district, :prev_province, :prev_zipcode, :prev_phone, :prev_major, :gpa, :special_ability,
+                     :file_photo, :file_transcript, :file_idcard, :pdpa_consent, 'pending')";
+        } else {
+            $sql = "INSERT INTO applicants 
+                    (citizen_id, application_no, round_id, admission_round, quota_type, academic_year, education_level, program_id, pvs_type,
+                     prefix, first_name, last_name, gender, birthdate, age, nationality, religion,
+                     addr_no, addr_moo, addr_soi, addr_road, addr_subdistrict, addr_district, addr_province, addr_zipcode, address,
+                     phone, email, password,
+                     parent_name, parent_phone,
+                     father_prefix, father_firstname, father_lastname, father_occupation, father_phone,
+                     mother_prefix, mother_firstname, mother_lastname, mother_occupation, mother_phone,
+                     prev_level, previous_school, prev_subdistrict, prev_district, prev_province, prev_zipcode, prev_phone, prev_major, gpa, special_ability,
+                     file_photo, file_transcript, file_idcard, pdpa_consent, status) 
+                    VALUES 
+                    (:citizen_id, :application_no, :round_id, :admission_round, :quota_type, :academic_year, :education_level, :program_id, :pvs_type,
+                     :prefix, :first_name, :last_name, :gender, :birthdate, :age, :nationality, :religion,
+                     :addr_no, :addr_moo, :addr_soi, :addr_road, :addr_subdistrict, :addr_district, :addr_province, :addr_zipcode, :address,
+                     :phone, :email, :password,
+                     :parent_name, :parent_phone,
+                     :father_prefix, :father_firstname, :father_lastname, :father_occupation, :father_phone,
+                     :mother_prefix, :mother_firstname, :mother_lastname, :mother_occupation, :mother_phone,
+                     :prev_level, :previous_school, :prev_subdistrict, :prev_district, :prev_province, :prev_zipcode, :prev_phone, :prev_major, :gpa, :special_ability,
+                     :file_photo, :file_transcript, :file_idcard, :pdpa_consent, 'pending')";
+        }
 
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([
+        $exec_params = [
             ':citizen_id'       => $id_card,
             ':application_no'   => $application_no,
             ':round_id'         => $round_id,
@@ -229,7 +268,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             ':education_level'  => $education_level,
             ':program_id'       => $program_id,
             ':pvs_type'         => $pvs_type,
-            ':curriculum_type'  => $curriculum_type,
             ':prefix'           => $prefix,
             ':first_name'       => $firstname,
             ':last_name'        => $lastname,
@@ -276,7 +314,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             ':file_transcript'  => $file_transcript,
             ':file_idcard'      => $file_idcard,
             ':pdpa_consent'     => $pdpa_consent,
-        ]);
+        ];
+        if ($has_curr_col) {
+            $exec_params[':curriculum_type'] = $curriculum_type;
+        }
+
+        $stmt->execute($exec_params);
 
         $app_id = (int)$pdo->lastInsertId();
 

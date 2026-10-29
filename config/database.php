@@ -58,3 +58,19 @@ date_default_timezone_set('Asia/Bangkok');
 $pdo = getDB();
 $conn = $pdo;
 
+// ตรวจสอบและอัปเดตโครงสร้างตาราง programs และ applicants อัตโนมัติ (Auto-Migration)
+try {
+    if (isset($pdo) && $pdo instanceof PDO) {
+        $col1 = $pdo->query("SHOW COLUMNS FROM `programs` LIKE 'program_type'")->fetchAll();
+        if (empty($col1)) {
+            $pdo->exec("ALTER TABLE `programs` ADD COLUMN `program_type` VARCHAR(50) NOT NULL DEFAULT 'ปกติ' AFTER `education_level`");
+        }
+        $col2 = $pdo->query("SHOW COLUMNS FROM `applicants` LIKE 'curriculum_type'")->fetchAll();
+        if (empty($col2)) {
+            $pdo->exec("ALTER TABLE `applicants` ADD COLUMN `curriculum_type` VARCHAR(50) NOT NULL DEFAULT 'ระบบปกติ' AFTER `education_level`");
+        }
+    }
+} catch (Throwable $e) {
+    // ป้องกันการขัดข้องหากฐานข้อมูลถูกจำกัดสิทธิ์ ALTER
+}
+

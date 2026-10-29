@@ -8,9 +8,42 @@
 require_once __DIR__ . '/database.php';
 
 /**
+ * ตรวจสอบและอัปเดตโครงสร้างฐานข้อมูล (Auto-Migration)
+ * ให้รองรับคอลัมน์ program_type ใน programs และ curriculum_type ใน applicants อัตโนมัติ
+ */
+function ensureAdmissionDatabaseUpdates(PDO $pdo): void {
+    static $migrated = false;
+    if ($migrated) {
+        return;
+    }
+    $migrated = true;
+
+    // 1. ตาราง programs: เพิ่ม program_type
+    try {
+        $cols = $pdo->query("SHOW COLUMNS FROM `programs` LIKE 'program_type'")->fetchAll();
+        if (empty($cols)) {
+            $pdo->exec("ALTER TABLE `programs` ADD COLUMN `program_type` VARCHAR(50) NOT NULL DEFAULT 'ปกติ' AFTER `education_level`");
+        }
+    } catch (Throwable $e) {
+        error_log("Auto-migration programs.program_type: " . $e->getMessage());
+    }
+
+    // 2. ตาราง applicants: เพิ่ม curriculum_type
+    try {
+        $cols = $pdo->query("SHOW COLUMNS FROM `applicants` LIKE 'curriculum_type'")->fetchAll();
+        if (empty($cols)) {
+            $pdo->exec("ALTER TABLE `applicants` ADD COLUMN `curriculum_type` VARCHAR(50) NOT NULL DEFAULT 'ระบบปกติ' AFTER `education_level`");
+        }
+    } catch (Throwable $e) {
+        error_log("Auto-migration applicants.curriculum_type: " . $e->getMessage());
+    }
+}
+
+/**
  * สร้างตาราง admission_rounds หากยังไม่มี และ Seed ข้อมูลรอบเริ่มต้น
  */
 function ensureAdmissionRoundsTableExists(PDO $pdo): void {
+    ensureAdmissionDatabaseUpdates($pdo);
     static $initialized = false;
     if ($initialized) {
         return;

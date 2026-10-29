@@ -18,13 +18,35 @@ try {
 } catch (PDOException $e) {}
 
 // ดึงรายชื่อสาขาวิชาทั้งหมดที่เปิดรับสมัคร
+$programs = [];
+
+// ตรวจสอบและอัปเดตโครงสร้างตาราง programs และ applicants หากยังไม่มีคอลัมน์ใหม่ (Auto-Migration)
+$has_prog_type = false;
+try {
+    $chk_col = $pdo->query("SHOW COLUMNS FROM `programs` LIKE 'program_type'")->fetchAll();
+    if (!empty($chk_col)) {
+        $has_prog_type = true;
+    } else {
+        try {
+            $pdo->exec("ALTER TABLE `programs` ADD COLUMN `program_type` VARCHAR(50) NOT NULL DEFAULT 'ปกติ' AFTER `education_level`");
+            $has_prog_type = true;
+        } catch (Throwable $ex) {
+            $has_prog_type = false;
+        }
+    }
+} catch (Throwable $e) {
+    $has_prog_type = false;
+}
+
+$prog_type_sql = $has_prog_type ? "p.program_type" : "'ปกติ' AS program_type";
+
 try {
     $stmt_majors = $pdo->prepare("
         SELECT p.id AS major_id,
                p.program_code,
                p.program_name AS major_name,
                p.education_level AS level_name,
-               p.program_type,
+               {$prog_type_sql},
                p.seats_available,
                p.status,
                d.id AS dept_id,
@@ -51,7 +73,7 @@ try {
                    p.program_code,
                    p.program_name AS major_name,
                    p.education_level AS level_name,
-                   p.program_type,
+                   {$prog_type_sql},
                    p.seats_available,
                    p.status,
                    d.id AS dept_id,
@@ -71,8 +93,37 @@ try {
         ");
         $programs = $stmt_all->fetchAll(PDO::FETCH_ASSOC);
     }
-} catch (PDOException $e) {
-    $programs = [];
+} catch (Throwable $e) {
+    // ป้องกันกรณีฐานข้อมูลบนโฮสต์ยังไม่มีคอลัมน์ program_type และไม่สามารถ ALTER TABLE ได้
+    try {
+        $stmt_fallback = $pdo->query("
+            SELECT p.id AS major_id,
+                   p.program_code,
+                   p.program_name AS major_name,
+                   p.education_level AS level_name,
+                   'ปกติ' AS program_type,
+                   p.seats_available,
+                   p.status,
+                   d.id AS dept_id,
+                   d.dept_code,
+                   d.dept_name,
+                   d.description AS dept_desc,
+                   CASE p.education_level
+                       WHEN 'ปวช.' THEN 1
+                       WHEN 'ปวส.' THEN 2
+                       WHEN 'ปริญญาตรี' THEN 3
+                       ELSE 1
+                   END AS level_id
+            FROM programs p
+            JOIN departments d ON p.dept_id = d.id
+            WHERE p.status = 'open'
+            ORDER BY level_id ASC, d.id ASC, p.id ASC
+        ");
+        $programs = $stmt_fallback->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Throwable $e2) {
+        $programs = [];
+        error_log("programs.php load fallback error: " . $e2->getMessage());
+    }
 }
 
 // นับจำนวนสาขาวิชาแต่ละระดับ
