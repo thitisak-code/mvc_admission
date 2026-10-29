@@ -181,63 +181,11 @@ function getStatusBadge($status) {
 </head>
 <body>
 
-  <!-- Topbar -->
-  <header class="topbar py-2">
-    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-2">
-      <div>
-        <i class="bi bi-geo-alt-fill text-warning me-1"></i>
-        <span>วิทยาลัยอาชีวศึกษามหาสารคาม</span>
-      </div>
-      <div>
-        <span><i class="bi bi-telephone-fill me-1"></i> โทร. 043-711-371</span>
-      </div>
-    </div>
-  </header>
-
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg sticky-top">
-    <div class="container">
-      <a class="navbar-brand d-flex align-items-center gap-2 text-decoration-none" href="index.php">
-        <img src="img/Logo-W.png" alt="โลโก้" class="brand-logo-img">
-        <div>
-          <div style="font-weight: 700; color: var(--color-primary-deep); line-height: 1.15;">ระบบรับสมัครนักศึกษา</div>
-          <small style="font-size: 0.725rem; font-weight: 600; color: var(--color-primary);">วิทยาลัยอาชีวศึกษามหาสารคาม</small>
-        </div>
-      </a>
-      <div class="d-flex align-items-center gap-2 flex-wrap">
-        <a href="programs.php" class="btn btn-outline-secondary btn-sm">
-          <i class="bi bi-mortarboard me-1"></i> สาขาวิชาที่เปิดรับ
-        </a>
-        <a href="register.php" class="btn btn-outline-secondary btn-sm">
-          <i class="bi bi-pencil-square me-1"></i> สมัครเรียนออนไลน์
-        </a>
-        <a href="print_application.php<?= !empty($citizen_id) ? '?search=' . urlencode($citizen_id) : '' ?>" class="btn btn-outline-danger btn-sm">
-          <i class="bi bi-printer me-1"></i> พิมพ์ใบสมัคร/เอกสาร
-        </a>
-        <?php if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true): ?>
-          <?php if (($_SESSION['user_type'] ?? '') === 'admin'): ?>
-            <a href="admin.php" class="btn btn-danger btn-sm" style="background-color: var(--color-primary); border-color: var(--color-primary);">
-              <i class="bi bi-speedometer2 me-1"></i> แดชบอร์ดแอดมิน
-            </a>
-          <?php else: ?>
-            <span class="badge bg-danger-subtle text-danger px-3 py-2 rounded-pill d-none d-sm-inline-block">
-              <i class="bi bi-person-fill me-1"></i> <?= htmlspecialchars($_SESSION['user_name'] ?? 'ผู้สมัคร') ?>
-            </span>
-          <?php endif; ?>
-          <a href="logout.php" class="btn btn-outline-danger btn-sm">
-            <i class="bi bi-box-arrow-right me-1"></i> ออกจากระบบ
-          </a>
-        <?php else: ?>
-          <a href="login.php" class="btn btn-outline-danger btn-sm">
-            <i class="bi bi-person-fill me-1"></i> เข้าสู่ระบบ
-          </a>
-        <?php endif; ?>
-        <a href="index.php" class="btn btn-light btn-sm border text-secondary">
-          <i class="bi bi-house me-1"></i> หน้าแรก
-        </a>
-      </div>
-    </div>
-  </nav>
+  <!-- Unified Header & Mobile Bottom Navigation Bar -->
+  <?php 
+    $current_page = 'status';
+    require __DIR__ . '/includes/navbar.php'; 
+  ?>
 
   <!-- Main Content -->
   <main class="container py-5">
@@ -331,6 +279,11 @@ function getStatusBadge($status) {
                   <div class="info-label">สาขาวิชาที่เลือกศึกษาต่อ</div>
                   <div class="info-value text-primary fw-bold" style="color: var(--color-primary) !important;">
                     <?= htmlspecialchars($applicant['program_name'] ?? 'ไม่ระบุ') ?>
+                    <?php if (!empty($applicant['curriculum_type'])): ?>
+                      <span class="badge <?= strpos($applicant['curriculum_type'], 'ทวิภาคี') !== false ? 'bg-success' : 'bg-danger' ?> ms-1" style="font-size: 0.75rem;">
+                        <?= htmlspecialchars($applicant['curriculum_type']) ?>
+                      </span>
+                    <?php endif; ?>
                   </div>
                   <small class="text-secondary"><?= htmlspecialchars($applicant['dept_name'] ?? '') ?></small>
                 </div>

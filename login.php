@@ -366,20 +366,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
 
-  <!-- Top Announcement Bar -->
-  <header class="topbar py-2">
-    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-2">
-      <div class="d-flex align-items-center gap-2">
-        <i class="bi bi-geo-alt-fill text-warning"></i>
-        <span>วิทยาลัยอาชีวศึกษามหาสารคาม</span>
-      </div>
-      <div>
-        <a href="index.php" class="text-white text-decoration-none small">
-          <i class="bi bi-arrow-left me-1"></i> กลับสู่หน้าหลัก
-        </a>
-      </div>
-    </div>
-  </header>
+  <!-- Shared Unified Navbar & Mobile Bottom Navigation -->
+  <?php 
+    $current_page = 'login';
+    require __DIR__ . '/includes/navbar.php'; 
+  ?>
 
   <!-- Login Form Wrapper -->
   <main class="login-wrapper">

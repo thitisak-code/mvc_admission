@@ -32,6 +32,7 @@ $stmt_majors = $pdo->prepare("
            p.program_code,
            p.program_name AS major_name,
            p.education_level AS level_name,
+           p.program_type,
            p.seats_available,
            d.dept_name,
            CASE p.education_level
@@ -54,6 +55,7 @@ if (empty($majors)) {
                p.program_code,
                p.program_name AS major_name,
                p.education_level AS level_name,
+               p.program_type,
                p.seats_available,
                d.dept_name,
                CASE p.education_level
@@ -345,6 +347,28 @@ $logged_user_name = $is_admin ? ($user_name ?: ($_SESSION['admin_name'] ?? 'Admi
             background: white;
             border: 2px solid #eef2f6;
             transition: transform 0.25s ease;
+        }
+
+        .sidebar-avatar-circle {
+            width: 80px;
+            height: 80px;
+            aspect-ratio: 1 / 1;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--mvc-maroon-dark) 0%, var(--mvc-maroon) 100%);
+            color: #ffffff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            box-shadow: 0 4px 14px rgba(128, 0, 0, 0.22);
+            margin-bottom: 12px;
+            border: 3px solid #ffffff;
+            outline: 2px solid #eef2f6;
+            transition: transform 0.25s ease;
+        }
+
+        .sidebar-avatar-circle:hover {
+            transform: scale(1.05);
         }
 
         .sidebar-seal-img:hover {
@@ -1125,6 +1149,318 @@ $logged_user_name = $is_admin ? ($user_name ?: ($_SESSION['admin_name'] ?? 'Admi
             0% { left: -45%; }
             100% { left: 100%; }
         }
+
+        /* ==========================================================================
+           Multi-Step Registration Stepper Styles
+           ========================================================================== */
+        .registration-stepper {
+            position: relative;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 20px 16px 14px;
+            box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+            margin-bottom: 28px;
+        }
+
+        .step-progress-track {
+            position: absolute;
+            top: 42px;
+            left: 8%;
+            right: 8%;
+            height: 4px;
+            background-color: #e2e8f0;
+            z-index: 1;
+            border-radius: 4px;
+        }
+
+        .step-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--mvc-maroon) 0%, #e11d48 100%);
+            border-radius: 4px;
+            transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .step-items {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .step-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            width: 18%;
+            text-align: center;
+            transition: all 0.25s ease;
+            user-select: none;
+        }
+
+        .step-circle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background-color: #ffffff;
+            border: 2px solid #cbd5e1;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.15rem;
+            font-weight: 700;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .step-item:hover .step-circle {
+            border-color: var(--mvc-maroon);
+            color: var(--mvc-maroon);
+            transform: translateY(-2px);
+        }
+
+        .step-item.active .step-circle {
+            background: linear-gradient(135deg, var(--mvc-maroon-dark) 0%, var(--mvc-maroon) 100%);
+            border-color: var(--mvc-maroon);
+            color: #ffffff;
+            box-shadow: 0 4px 14px rgba(128, 0, 0, 0.35);
+            transform: scale(1.08);
+        }
+
+        .step-item.completed .step-circle {
+            background-color: #10b981;
+            border-color: #10b981;
+            color: #ffffff;
+            box-shadow: 0 3px 10px rgba(16, 185, 129, 0.25);
+        }
+
+        .step-title {
+            font-size: 0.825rem;
+            font-weight: 600;
+            color: #64748b;
+            margin-top: 8px;
+            line-height: 1.2;
+            transition: color 0.25s ease;
+        }
+
+        .step-item.active .step-title {
+            color: var(--mvc-maroon);
+            font-weight: 700;
+        }
+
+        .step-item.completed .step-title {
+            color: #10b981;
+        }
+
+        @media (max-width: 576px) {
+            .step-title {
+                display: none;
+            }
+            .step-circle {
+                width: 36px;
+                height: 36px;
+                font-size: 0.95rem;
+            }
+            .step-progress-track {
+                top: 36px;
+            }
+        }
+
+        /* Step Panels Animation */
+        .step-panel {
+            animation: fadeInStep 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeInStep {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Step Navigation Footer Controls */
+        .step-nav-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-top: 32px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            flex-wrap: wrap;
+        }
+
+        .btn-step-prev {
+            background-color: #f1f5f9;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+            padding: 10px 22px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .btn-step-prev:hover {
+            background-color: #e2e8f0;
+            color: #1e293b;
+        }
+
+        .btn-step-next {
+            background: linear-gradient(135deg, var(--mvc-maroon) 0%, var(--mvc-maroon-dark) 100%);
+            color: #ffffff;
+            border: none;
+            padding: 11px 28px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 14px rgba(128, 0, 0, 0.25);
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .btn-step-next:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(128, 0, 0, 0.35);
+            color: #ffffff;
+        }
+
+        /* Curriculum Radio Card Styles (ระบบปกติ vs ระบบทวิภาคี) */
+        .curriculum-card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .curriculum-option-card {
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 16px 18px;
+            background: #ffffff;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+        }
+
+        .curriculum-option-card:hover {
+            border-color: #cbd5e1;
+            background: #f8fafc;
+            transform: translateY(-2px);
+        }
+
+        .curriculum-option-card.selected {
+            border-color: var(--mvc-maroon);
+            background: #fdf2f2;
+            box-shadow: 0 4px 16px rgba(128, 0, 0, 0.12);
+        }
+
+        .curriculum-icon-wrap {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: #f1f5f9;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.35rem;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+        }
+
+        .curriculum-option-card.selected .curriculum-icon-wrap {
+            background: var(--mvc-maroon);
+            color: #ffffff;
+        }
+
+        .curriculum-badge-tag {
+            font-size: 0.725rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 20px;
+        }
+
+        /* Review Summary Cards in Step 5 */
+        .review-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+            position: relative;
+        }
+
+        .review-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+
+        .review-card-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--mvc-maroon);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .review-edit-btn {
+            background: transparent;
+            border: 1px solid #cbd5e1;
+            color: #475569;
+            font-size: 0.8rem;
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .review-edit-btn:hover {
+            border-color: var(--mvc-maroon);
+            color: var(--mvc-maroon);
+            background: #fdf2f2;
+        }
+
+        .review-table th {
+            width: 32%;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #64748b;
+            padding: 6px 8px 6px 0;
+            vertical-align: top;
+        }
+
+        .review-table td {
+            font-size: 0.925rem;
+            font-weight: 500;
+            color: #1e293b;
+            padding: 6px 0;
+            vertical-align: top;
+        }
     </style>
 </head>
 <body>
@@ -1144,60 +1480,12 @@ $logged_user_name = $is_admin ? ($user_name ?: ($_SESSION['admin_name'] ?? 'Admi
         </div>
     </div>
 
-    <!-- Topbar (จาก index.php) -->
-    <div class="topbar">
-        <div class="container-fluid px-lg-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <div class="d-flex align-items-center gap-3 flex-wrap">
-                <span><i class="bi bi-mortarboard-fill me-1 text-warning"></i> ระบบรับสมัครนักเรียน นักศึกษาออนไลน์ (MVC Admission)</span>
-                <span class="d-none d-md-inline opacity-50">|</span>
-                <span class="d-none d-md-inline"><i class="bi bi-calendar3 me-1"></i> ปีการศึกษา <?= htmlspecialchars($active_year) ?></span>
-            </div>
-            <div class="d-flex align-items-center gap-3">
-                <a href="tel:043222283"><i class="bi bi-telephone-fill me-1"></i> 043-222283</a>
-                <span class="opacity-50">|</span>
-                <?php if ($is_admin): ?>
-                    <a href="admin.php" class="text-warning fw-semibold"><i class="bi bi-speedometer2 me-1"></i> จัดการระบบ (<?= htmlspecialchars($_SESSION['admin_name'] ?? 'Admin') ?>)</a>
-                <?php else: ?>
-                    <a href="login.php"><i class="bi bi-shield-lock me-1"></i> สำหรับเจ้าหน้าที่</a>
-                <?php endif; ?>
-            </div>
-        </div>
-    </div>
-
-    <!-- Navbar (จาก index.php พร้อมปุ่มเปิด/ปิด Slide Menu เดิม) -->
-    <nav class="navbar navbar-expand-lg sticky-top">
-        <div class="container-fluid px-lg-4">
-            <div class="d-flex align-items-center gap-2">
-                <button class="sidebar-toggle-btn" type="button" id="sidebarToggle" title="เปิด/ปิดเมนูด้านข้าง">
-                    <i class="fa-solid fa-bars"></i>
-                </button>
-                <a class="navbar-brand d-flex align-items-center gap-2 gap-sm-3 m-0" href="index.php">
-                    <img src="img/logo.png" alt="Logo" width="48" height="48" class="rounded-circle border border-2 border-danger-subtle p-1 bg-white shadow-sm" style="aspect-ratio: 1 / 1; object-fit: contain;" onerror="this.src='assets/images/mvc_round_seal.png'">
-                    <div>
-                        <div class="brand-title">วิทยาลัยอาชีวศึกษามหาสารคาม</div>
-                        <div class="brand-subtitle d-none d-sm-block">Mahasarakham Vocational College</div>
-                    </div>
-                </a>
-            </div>
-            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="mainNav">
-                <ul class="navbar-nav ms-auto align-items-lg-center gap-1 mt-3 mt-lg-0">
-                    <li class="nav-item"><a class="nav-link" href="index.php"><i class="bi bi-house-door me-1"></i> หน้าแรก</a></li>
-                    <li class="nav-item"><a class="nav-link" href="programs.php"><i class="bi bi-mortarboard me-1"></i> สาขาวิชาที่เปิดรับ</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="register.php"><i class="bi bi-pencil-square me-1"></i> สมัครเรียนออนไลน์</a></li>
-                    <li class="nav-item"><a class="nav-link" href="status.php"><i class="bi bi-search me-1"></i> ตรวจสอบสถานะ</a></li>
-                    <li class="nav-item"><a class="nav-link" href="print_application.php"><i class="bi bi-printer me-1"></i> พิมพ์ใบสมัคร</a></li>
-                    <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
-                        <a class="btn btn-outline-red btn-sm px-3 py-2" href="status.php">
-                            <i class="bi bi-clipboard-check"></i> ตรวจผล / พิมพ์ใบสมัคร
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    <!-- Unified Header & Mobile Bottom Navigation Bar -->
+    <?php 
+        $current_page = 'register';
+        $show_sidebar_toggle = true;
+        require __DIR__ . '/includes/navbar.php'; 
+    ?>
 
     <!-- Backdrop สำหรับ Slide Menu บนจอมือถือ/แท็บเล็ต -->
     <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
@@ -1214,7 +1502,9 @@ $logged_user_name = $is_admin ? ($user_name ?: ($_SESSION['admin_name'] ?? 'Admi
                     </button>
                 </div>
                 <div class="sidebar-profile">
-                    <img src="assets/images/mvc_round_seal.png?v=<?= time() ?>" alt="วิทยาลัยอาชีวศึกษามหาสารคาม" class="sidebar-seal-img">
+                    <div class="sidebar-avatar-circle" title="ผู้สมัครออนไลน์">
+                        <i class="fa-solid fa-user-graduate"></i>
+                    </div>
                     <div class="sidebar-user-name"><?= htmlspecialchars($logged_user_name) ?></div>
                     <div class="sidebar-user-status">ปีการศึกษา <?= htmlspecialchars($active_year) ?></div>
 
@@ -1292,67 +1582,46 @@ $logged_user_name = $is_admin ? ($user_name ?: ($_SESSION['admin_name'] ?? 'Admi
                         </div>
                     </div>
 
+                    <!-- Stepper Progress Indicator -->
+                    <div class="registration-stepper mb-4">
+                        <div class="step-progress-track">
+                            <div class="step-progress-bar" id="stepperProgressBar" style="width: 0%;"></div>
+                        </div>
+                        <div class="step-items">
+                            <div class="step-item active" data-step="1" onclick="goToStep(1)">
+                                <div class="step-circle"><i class="bi bi-person-fill"></i></div>
+                                <div class="step-title">ข้อมูลผู้สมัคร</div>
+                            </div>
+                            <div class="step-item" data-step="2" onclick="goToStep(2)">
+                                <div class="step-circle"><i class="bi bi-book-fill"></i></div>
+                                <div class="step-title">ประวัติการศึกษา</div>
+                            </div>
+                            <div class="step-item" data-step="3" onclick="goToStep(3)">
+                                <div class="step-circle"><i class="bi bi-mortarboard-fill"></i></div>
+                                <div class="step-title">เลือกสาขาวิชา</div>
+                            </div>
+                            <div class="step-item" data-step="4" onclick="goToStep(4)">
+                                <div class="step-circle"><i class="bi bi-file-earmark-arrow-up-fill"></i></div>
+                                <div class="step-title">แนบเอกสาร</div>
+                            </div>
+                            <div class="step-item" data-step="5" onclick="goToStep(5)">
+                                <div class="step-circle"><i class="bi bi-clipboard-check-fill"></i></div>
+                                <div class="step-title">ตรวจสอบข้อมูล</div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Form start -->
                     <form action="save_register.php" method="POST" enctype="multipart/form-data" id="admissionForm">
                         <input type="hidden" name="academic_year" value="<?= htmlspecialchars($active_year) ?>">
                         <input type="hidden" name="id_card" id="hidden_id_card" value="">
                         <input type="hidden" name="level_id" id="hidden_level_id" value="1">
+                        <input type="hidden" name="curriculum_type" id="hidden_curriculum_type" value="ระบบปกติ">
 
-                        <?php if ($selected_major_info): ?>
-                        <div class="alert alert-success border-2 d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4 p-3 shadow-sm rounded-3" style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-color: #86efac !important;">
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="rounded-circle text-white d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px; font-size: 1.4rem; background-color: #16a34a; box-shadow: 0 4px 10px rgba(22, 163, 74, 0.25);">
-                                    <i class="bi bi-mortarboard-fill"></i>
-                                </div>
-                                <div>
-                                    <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
-                                        <span class="badge bg-danger px-2 py-1"><?= htmlspecialchars($selected_major_info['level_name']) ?></span>
-                                        <span class="fw-bold fs-6 text-dark"><?= htmlspecialchars($selected_major_info['major_name']) ?></span>
-                                        <span class="badge bg-light text-secondary border">รหัส <?= htmlspecialchars($selected_major_info['program_code']) ?></span>
-                                    </div>
-                                    <div class="small text-secondary">
-                                        <i class="bi bi-building me-1"></i> <?= htmlspecialchars($selected_major_info['dept_name']) ?> • ระบบได้เลือกสาขานี้ในแบบฟอร์มให้คุณอัตโนมัติแล้ว
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="d-flex gap-2">
-                                <a href="programs.php" class="btn btn-sm btn-outline-dark bg-white shadow-sm">
-                                    <i class="bi bi-arrow-left-right me-1"></i> เปลี่ยนสาขาวิชา
-                                </a>
-                            </div>
-                        </div>
-                        <?php endif; ?>
-
-                        <!-- Round & Quota Select -->
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-6">
-                                <label class="form-label">รอบการรับสมัคร <span class="text-danger">*</span></label>
-                                <select name="round_id" class="form-select" required>
-                                    <?php if (!empty($active_rounds)): ?>
-                                        <?php foreach ($active_rounds as $r): ?>
-                                            <option value="<?= (int)$r['id'] ?>">
-                                                [<?= $r['round_type'] === 'quota' ? 'รอบโควตา' : 'รอบปกติ' ?>] <?= htmlspecialchars($r['round_name']) ?> (ปีการศึกษา <?= htmlspecialchars($r['academic_year']) ?>)
-                                            </option>
-                                        <?php endforeach; ?>
-                                    <?php else: ?>
-                                        <option value="<?= (int)($current_round['id'] ?? 1) ?>">
-                                            <?= htmlspecialchars($current_round['round_name']) ?>
-                                        </option>
-                                    <?php endif; ?>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">ประเภทการสมัคร / ประเภทโควตา <span class="text-danger">*</span></label>
-                                <select name="quota_type" class="form-select" required>
-                                    <option value="">--กรุณาเลือกประเภท--</option>
-                                    <option value="โควตาทั่วไป (เกรดเฉลี่ยสะสม)" selected>โควตาทั่วไป (เกรดเฉลี่ยสะสม)</option>
-                                    <option value="โควตากรณีพิเศษ (เรียนดี / กิจกรรมเด่น / กีฬา)">โควตากรณีพิเศษ (เรียนดี / กิจกรรมเด่น / กีฬา)</option>
-                                    <option value="โควตาความสามารถพิเศษ / ดนตรีและศิลปวัฒนธรรม">โควตาความสามารถพิเศษ / ดนตรีและศิลปวัฒนธรรม</option>
-                                    <option value="โควตาสถานศึกษาเดิม">โควตาสถานศึกษาเดิม</option>
-                                    <option value="รอบรับสมัครทั่วไป (รอบปกติ)">รอบรับสมัครทั่วไป (รอบปกติ)</option>
-                                </select>
-                            </div>
-                        </div>
+                        <!-- ==========================================================
+                             STEP 1: ข้อมูลผู้สมัครและที่อยู่
+                             ========================================================== -->
+                        <div class="step-panel" id="stepPanel1">
 
                         <!-- 1. ข้อมูลผู้สมัคร -->
                         <div class="form-section-header">1. ข้อมูลผู้สมัคร</div>
@@ -1502,6 +1771,23 @@ $logged_user_name = $is_admin ? ($user_name ?: ($_SESSION['admin_name'] ?? 'Admi
                             </div>
                         </div>
 
+                        <!-- Step 1 Navigation -->
+                        <div class="step-nav-footer">
+                            <button type="reset" class="btn btn-step-prev" onclick="resetFormCustom()">
+                                <i class="bi bi-arrow-counterclockwise"></i> ล้างข้อมูล
+                            </button>
+                            <button type="button" class="btn btn-step-next" onclick="nextStep(1)">
+                                <span>ขั้นตอนถัดไป: ประวัติการศึกษา</span>
+                                <i class="bi bi-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ==========================================================
+                         STEP 2: ประวัติการศึกษาเดิมและข้อมูลครอบครัว
+                         ========================================================== -->
+                    <div class="step-panel d-none" id="stepPanel2">
+
                         <!-- 3. ข้อมูลของบิดาและมารดา -->
                         <div class="form-section-header">3. ข้อมูลของบิดาและมารดา</div>
 
@@ -1632,13 +1918,86 @@ $logged_user_name = $is_admin ? ($user_name ?: ($_SESSION['admin_name'] ?? 'Admi
                             </div>
                         </div>
 
-                        <!-- 5. ข้อมูลหลักสูตรและสาขาที่ต้องการสมัคร -->
-                        <div class="form-section-header">5. ข้อมูลหลักสูตรและสาขาที่ต้องการสมัคร</div>
+                        <!-- Step 2 Navigation -->
+                        <div class="step-nav-footer">
+                            <button type="button" class="btn btn-step-prev" onclick="prevStep(2)">
+                                <i class="bi bi-arrow-left"></i> ย้อนกลับ
+                            </button>
+                            <button type="button" class="btn btn-step-next" onclick="nextStep(2)">
+                                <span>ขั้นตอนถัดไป: เลือกหลักสูตรและสาขาวิชา</span>
+                                <i class="bi bi-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
 
-                        <div class="mb-3">
+                    <!-- ==========================================================
+                         STEP 3: เลือกหลักสูตรและสาขาวิชา
+                         ========================================================== -->
+                    <div class="step-panel d-none" id="stepPanel3">
+                        
+                        <?php if ($selected_major_info): ?>
+                        <div class="alert alert-success border-2 d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4 p-3 shadow-sm rounded-3" style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-color: #86efac !important;">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-circle text-white d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px; font-size: 1.4rem; background-color: #16a34a; box-shadow: 0 4px 10px rgba(22, 163, 74, 0.25);">
+                                    <i class="bi bi-mortarboard-fill"></i>
+                                </div>
+                                <div>
+                                    <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                                        <span class="badge bg-danger px-2 py-1"><?= htmlspecialchars($selected_major_info['level_name']) ?></span>
+                                        <span class="fw-bold fs-6 text-dark"><?= htmlspecialchars($selected_major_info['major_name']) ?></span>
+                                        <span class="badge bg-light text-secondary border">รหัส <?= htmlspecialchars($selected_major_info['program_code']) ?></span>
+                                    </div>
+                                    <div class="small text-secondary">
+                                        <i class="bi bi-building me-1"></i> <?= htmlspecialchars($selected_major_info['dept_name']) ?> • ระบบได้เลือกสาขานี้ในแบบฟอร์มให้คุณอัตโนมัติแล้ว
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <a href="programs.php" class="btn btn-sm btn-outline-dark bg-white shadow-sm">
+                                    <i class="bi bi-arrow-left-right me-1"></i> เปลี่ยนสาขาวิชา
+                                </a>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+
+                        <!-- Round & Quota Select -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold" style="color: var(--color-secondary-deep);">รอบการรับสมัคร <span class="text-danger">*</span></label>
+                                <select name="round_id" class="form-select" required>
+                                    <?php if (!empty($active_rounds)): ?>
+                                        <?php foreach ($active_rounds as $r): ?>
+                                            <option value="<?= (int)$r['id'] ?>">
+                                                [<?= $r['round_type'] === 'quota' ? 'รอบโควตา' : 'รอบปกติ' ?>] <?= htmlspecialchars($r['round_name']) ?> (ปีการศึกษา <?= htmlspecialchars($r['academic_year']) ?>)
+                                            </option>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <option value="<?= (int)($current_round['id'] ?? 1) ?>">
+                                            <?= htmlspecialchars($current_round['round_name']) ?>
+                                        </option>
+                                    <?php endif; ?>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold" style="color: var(--color-secondary-deep);">ประเภทการสมัคร / ประเภทโควตา <span class="text-danger">*</span></label>
+                                <select name="quota_type" class="form-select" required>
+                                    <option value="">--กรุณาเลือกประเภท--</option>
+                                    <option value="โควตาทั่วไป (เกรดเฉลี่ยสะสม)" selected>โควตาทั่วไป (เกรดเฉลี่ยสะสม)</option>
+                                    <option value="โควตากรณีพิเศษ (เรียนดี / กิจกรรมเด่น / กีฬา)">โควตากรณีพิเศษ (เรียนดี / กิจกรรมเด่น / กีฬา)</option>
+                                    <option value="โควตาความสามารถพิเศษ / ดนตรีและศิลปวัฒนธรรม">โควตาความสามารถพิเศษ / ดนตรีและศิลปวัฒนธรรม</option>
+                                    <option value="โควตาสถานศึกษาเดิม">โควตาสถานศึกษาเดิม</option>
+                                    <option value="รอบรับสมัครทั่วไป (รอบปกติ)">รอบรับสมัครทั่วไป (รอบปกติ)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- 5. ข้อมูลหลักสูตรและสาขาที่ต้องการสมัคร -->
+                        <div class="form-section-header">ข้อมูลหลักสูตรและสาขาที่ต้องการสมัคร</div>
+
+                        <div class="mb-4">
                             <label class="form-label d-block fw-bold" style="color: var(--color-secondary-deep);">
                                 เข้าศึกษาต่อในระดับ <span class="text-danger">*</span>
-                                <span class="text-muted fw-normal small ms-2">(คลิกเลือกระดับที่ต้องการสมัคร หรือเลือกวุฒิเดิมในข้อ 4)</span>
+                                <span class="text-muted fw-normal small ms-2">(ระบบจะล็อกระดับการศึกษาให้อัตโนมัติตามวุฒิเดิมที่จบมา)</span>
                             </label>
                             <div class="level-radio-group">
                                 <label class="level-radio-item" id="label_level_1">
@@ -1656,8 +2015,49 @@ $logged_user_name = $is_admin ? ($user_name ?: ($_SESSION['admin_name'] ?? 'Admi
                             </div>
                         </div>
 
+                        <!-- ส่วนเลือกระบบการเรียน (ระบบปกติ vs ระบบทวิภาคี) -->
+                        <div class="mb-4">
+                            <label class="form-label d-block fw-bold" style="color: var(--color-secondary-deep);">
+                                <i class="bi bi-briefcase-fill me-1 text-danger"></i> ระบบการเรียน / รูปแบบหลักสูตร <span class="text-danger">*</span>
+                                <span class="badge bg-secondary-subtle text-secondary ms-2 fw-normal" id="curriculum_hint_badge">เลือกรูปแบบการเรียนที่ต้องการ</span>
+                            </label>
+                            <div class="curriculum-card-grid">
+                                <label class="curriculum-option-card selected" id="card_curr_normal" for="curr_normal">
+                                    <input type="radio" name="curriculum_radio" id="curr_normal" value="ระบบปกติ" class="d-none" checked onchange="onCurriculumTypeChange('ระบบปกติ')">
+                                    <div class="curriculum-icon-wrap">
+                                        <i class="bi bi-building"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex align-items-center justify-content-between mb-1">
+                                            <span class="fw-bold text-dark fs-6">ระบบปกติ (Regular)</span>
+                                            <span class="badge bg-danger-subtle text-danger curriculum-badge-tag">แผนปกติ</span>
+                                        </div>
+                                        <div class="small text-muted" style="font-size: 0.825rem;">
+                                            จัดการเรียนการสอนในสถานศึกษาตามแผนการเรียนมาตรฐาน
+                                        </div>
+                                    </div>
+                                </label>
+
+                                <label class="curriculum-option-card" id="card_curr_dual" for="curr_dual">
+                                    <input type="radio" name="curriculum_radio" id="curr_dual" value="ระบบทวิภาคี" class="d-none" onchange="onCurriculumTypeChange('ระบบทวิภาคี')">
+                                    <div class="curriculum-icon-wrap">
+                                        <i class="bi bi-briefcase"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex align-items-center justify-content-between mb-1">
+                                            <span class="fw-bold text-dark fs-6">ระบบทวิภาคี (Dual / DVE)</span>
+                                            <span class="badge bg-success-subtle text-success curriculum-badge-tag">เรียน+ฝึกงาน</span>
+                                        </div>
+                                        <div class="small text-muted" style="font-size: 0.825rem;">
+                                            เรียนร่วมกับการฝึกปฏิบัติงานจริงในสถานประกอบการ มีเบี้ยเลี้ยงและฝึกวิชาชีพเข้มข้น
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
                         <!-- ตัวเลือกเฉพาะระดับ ปวส. (แสดงเมื่อเข้าศึกษาต่อในระดับ ปวส.) -->
-                        <div id="pvs_options_container" class="mb-3" style="display: none;">
+                        <div id="pvs_options_container" class="mb-4" style="display: none;">
                             <label class="form-label d-block fw-bold mb-2" style="color: var(--mvc-maroon);">
                                 รูปแบบการเข้าศึกษาต่อระดับ ปวส. <span class="text-danger">*</span>
                             </label>
@@ -1692,19 +2092,34 @@ $logged_user_name = $is_admin ? ($user_name ?: ($_SESSION['admin_name'] ?? 'Admi
                         </div>
 
                         <div class="mb-4 col-md-8 col-lg-7">
-                            <label class="form-label">ระบุสาขาวิชาที่ต้องการสมัคร <span class="text-danger">*</span></label>
-                            <select name="major_id" id="major_id" class="form-select" required>
+                            <label class="form-label fw-bold" style="color: var(--color-secondary-deep);">ระบุสาขาวิชาที่ต้องการสมัคร <span class="text-danger">*</span></label>
+                            <select name="major_id" id="major_id" class="form-select select2-searchable" required onchange="onMajorSelectChange(this)">
                                 <option value="">--กรุณาเลือกสาขาวิชา--</option>
                                 <?php foreach($majors as $m): ?>
-                                    <option value="<?= (int)$m['major_id'] ?>" data-level="<?= (int)$m['level_id'] ?>">
-                                        [<?= htmlspecialchars($m['program_code']) ?>] <?= htmlspecialchars($m['major_name']) ?> — <?= htmlspecialchars($m['dept_name']) ?> (รับ <?= (int)$m['seats_available'] ?> ที่นั่ง)
+                                    <option value="<?= (int)$m['major_id'] ?>" data-level="<?= (int)$m['level_id'] ?>" data-type="<?= htmlspecialchars($m['program_type'] ?? 'ปกติ') ?>">
+                                        [<?= htmlspecialchars($m['program_code']) ?>] <?= htmlspecialchars($m['major_name']) ?> (<?= htmlspecialchars($m['program_type'] ?? 'ปกติ') ?>) — <?= htmlspecialchars($m['dept_name']) ?> (รับ <?= (int)$m['seats_available'] ?> ที่นั่ง)
                                     </option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
 
-                        <!-- 6. กรุณาแนบเอกสารหลักฐานประกอบการสมัครเข้าศึกษาต่อ -->
-                        <div class="form-section-header">6. กรุณาแนบเอกสารหลักฐานประกอบการสมัครเข้าศึกษาต่อ</div>
+                        <!-- Step 3 Navigation -->
+                        <div class="step-nav-footer">
+                            <button type="button" class="btn btn-step-prev" onclick="prevStep(3)">
+                                <i class="bi bi-arrow-left"></i> ย้อนกลับ
+                            </button>
+                            <button type="button" class="btn btn-step-next" onclick="nextStep(3)">
+                                <span>ขั้นตอนถัดไป: แนบเอกสารหลักฐาน</span>
+                                <i class="bi bi-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ==========================================================
+                         STEP 4: แนบเอกสารหลักฐานประกอบการสมัคร
+                         ========================================================== -->
+                    <div class="step-panel d-none" id="stepPanel4">
+                        <div class="form-section-header">กรุณาแนบเอกสารหลักฐานประกอบการสมัครเข้าศึกษาต่อ</div>
 
                         <!-- File 1: บัตร ปชช. -->
                         <div class="mb-3">
@@ -1755,14 +2170,44 @@ $logged_user_name = $is_admin ? ($user_name ?: ($_SESSION['admin_name'] ?? 'Admi
                             </div>
                         </div>
 
+                        <!-- Step 4 Navigation -->
+                        <div class="step-nav-footer">
+                            <button type="button" class="btn btn-step-prev" onclick="prevStep(4)">
+                                <i class="bi bi-arrow-left"></i> ย้อนกลับ
+                            </button>
+                            <button type="button" class="btn btn-step-next" onclick="nextStep(4)">
+                                <span>ขั้นตอนถัดไป: ตรวจสอบข้อมูลทั้งหมด</span>
+                                <i class="bi bi-check2-circle"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ==========================================================
+                         STEP 5: ตรวจสอบข้อมูลการสมัคร (Review & Confirmation)
+                         ========================================================== -->
+                    <div class="step-panel d-none" id="stepPanel5">
+                        
+                        <div class="alert alert-primary border-2 d-flex align-items-center gap-3 mb-4 p-3 rounded-3 shadow-sm" style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-color: #93c5fd !important;">
+                            <div class="rounded-circle text-white d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px; font-size: 1.3rem; background-color: #2563eb;">
+                                <i class="bi bi-shield-check"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold fs-6 text-dark">ขั้นตอนที่ 5: ตรวจสอบความถูกต้องของข้อมูลการสมัคร</div>
+                                <div class="small text-secondary">โปรดตรวจทานข้อมูลทั้งหมดที่ท่านได้กรอกอย่างละเอียด หากต้องการแก้ไขข้อมูลส่วนใด สามารถคลิกปุ่ม "แก้ไข" ในการ์ดนั้นๆ ได้ทันที</div>
+                            </div>
+                        </div>
+
+                        <!-- Dynamic Summary Box -->
+                        <div id="review_summary_box"></div>
+
                         <!-- ข้อตกลง และ ยินยอม PDPA -->
-                        <div class="mt-4 pt-2 border-top">
+                        <div class="mt-4 pt-3 border-top">
                             <p class="notice-blue mb-1">
                                 สำเนาเอกสารทุกแผ่นเขียนคำว่า <span class="notice-highlight-red">"สำเนาถูกต้อง"</span> และลงชื่อในเอกสารด้วยปากกาหมึกสีน้ำเงิน
                             </p>
                             <span class="notice-link-blue mb-2">กรุณาคลิกเพื่อ ยอมรับ เงื่อนไข</span>
 
-                            <div class="agreement-checkbox-wrapper">
+                            <div class="agreement-checkbox-wrapper mb-2">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="certifyCheck" name="certify_check" required>
                                     <label class="form-check-label" for="certifyCheck">
@@ -1771,7 +2216,6 @@ $logged_user_name = $is_admin ? ($user_name ?: ($_SESSION['admin_name'] ?? 'Admi
                                 </div>
                             </div>
 
-                            <!-- ส่วนเพิ่มเติม: ยินยอมกฎหมาย PDPA -->
                             <div class="agreement-checkbox-wrapper mb-4">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="pdpaCheck" name="pdpa_consent" value="1" required>
@@ -1781,16 +2225,18 @@ $logged_user_name = $is_admin ? ($user_name ?: ($_SESSION['admin_name'] ?? 'Admi
                                 </div>
                             </div>
 
-                            <!-- ปุ่มบันทึก & ยกเลิก -->
-                            <div class="d-flex align-items-center gap-3">
-                                <button type="submit" class="btn btn-action-save">
-                                    <i class="fa-regular fa-floppy-disk me-1"></i> บันทึก
+                            <!-- ปุ่มบันทึก & ย้อนกลับ -->
+                            <div class="step-nav-footer">
+                                <button type="button" class="btn btn-step-prev" onclick="prevStep(5)">
+                                    <i class="bi bi-arrow-left"></i> ย้อนกลับไปแก้ไข
                                 </button>
-                                <button type="reset" class="btn btn-action-cancel" onclick="resetFormCustom()">
-                                    <i class="fa-solid fa-xmark me-1"></i> ยกเลิก
+                                <button type="submit" class="btn btn-action-save px-4 py-2 fs-6 shadow" id="btnFinalSubmit">
+                                    <i class="bi bi-check-circle-fill me-1"></i> ยืนยันและส่งใบสมัคร
                                 </button>
                             </div>
                         </div>
+
+                    </div>
 
                     </form>
                     <!-- Form end -->
@@ -1922,6 +2368,7 @@ $logged_user_name = $is_admin ? ($user_name ?: ($_SESSION['admin_name'] ?? 'Admi
             });
         }
         initSearchableSelects();
+        $('#major_id').on('change', function() { onMajorSelectChange(this); });
 
         // 3.3 ข้อ 2: ข้อมูลที่อยู่ผู้สมัคร (จังหวัด -> อำเภอ -> ตำบล -> รหัสไปรษณีย์)
         // เมื่อเลือกจังหวัดผู้สมัคร
@@ -2285,6 +2732,8 @@ $logged_user_name = $is_admin ? ($user_name ?: ($_SESSION['admin_name'] ?? 'Admi
 
             if (preMajorId) {
                 majorSelect.value = preMajorId;
+                $('#major_id').val(preMajorId).trigger('change');
+                onMajorSelectChange(majorSelect);
                 majorSelect.classList.add('border-danger', 'border-2', 'shadow-sm');
                 setTimeout(() => {
                     majorSelect.classList.remove('border-danger', 'border-2', 'shadow-sm');
@@ -2352,57 +2801,575 @@ $logged_user_name = $is_admin ? ($user_name ?: ($_SESSION['admin_name'] ?? 'Admi
             }, 50);
         }
 
-        // ตรวจสอบความถูกต้องก่อนส่งฟอร์ม
+        // -------------------------------------------------------------------------
+        // 6. Multi-Step Wizard Controller & Dynamic Review Summary
+        // -------------------------------------------------------------------------
+        let currentStep = 1;
+        const totalSteps = 5;
+
+        function updateStepperUI(step) {
+            currentStep = step;
+            const progressPercent = ((step - 1) / (totalSteps - 1)) * 100;
+            const bar = document.getElementById('stepperProgressBar');
+            if (bar) bar.style.width = progressPercent + '%';
+
+            document.querySelectorAll('.step-item').forEach(item => {
+                const itemStep = parseInt(item.getAttribute('data-step'));
+                item.classList.remove('active', 'completed');
+                if (itemStep === step) {
+                    item.classList.add('active');
+                } else if (itemStep < step) {
+                    item.classList.add('completed');
+                }
+            });
+
+            for (let s = 1; s <= totalSteps; s++) {
+                const panel = document.getElementById('stepPanel' + s);
+                if (panel) {
+                    if (s === step) {
+                        panel.classList.remove('d-none');
+                    } else {
+                        panel.classList.add('d-none');
+                    }
+                }
+            }
+
+            if (step === 5) {
+                renderReviewSummary();
+            }
+
+            const card = document.querySelector('.main-content-card');
+            if (card) {
+                const yOffset = -20;
+                const y = card.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                window.scrollTo({ top: y, behavior: 'smooth' });
+            }
+        }
+
+        function goToStep(targetStep) {
+            if (targetStep < currentStep) {
+                updateStepperUI(targetStep);
+            } else if (targetStep > currentStep) {
+                for (let s = currentStep; s < targetStep; s++) {
+                    if (!validateStep(s)) {
+                        return false;
+                    }
+                }
+                updateStepperUI(targetStep);
+            }
+        }
+
+        function nextStep(step) {
+            if (validateStep(step)) {
+                if (step < totalSteps) {
+                    updateStepperUI(step + 1);
+                }
+            }
+        }
+
+        function prevStep(step) {
+            if (step > 1) {
+                updateStepperUI(step - 1);
+            }
+        }
+
+        function validateStep(step) {
+            updateFullIdCard();
+
+            if (step === 1) {
+                if (hiddenIdCard.value.length !== 13) {
+                    alert('กรุณากรอกเลขประจำตัวประชาชนให้ครบ 13 หลัก');
+                    idBoxes[0].focus();
+                    return false;
+                }
+
+                const prefix = document.querySelector('select[name="prefix"]')?.value;
+                if (!prefix) {
+                    alert('กรุณาเลือกคำนำหน้าชื่อ');
+                    document.querySelector('select[name="prefix"]')?.focus();
+                    return false;
+                }
+
+                const fname = document.querySelector('input[name="first_name"]')?.value.trim();
+                if (!fname) {
+                    alert('กรุณากรอกชื่อผู้สมัคร');
+                    document.querySelector('input[name="first_name"]')?.focus();
+                    return false;
+                }
+
+                const lname = document.querySelector('input[name="last_name"]')?.value.trim();
+                if (!lname) {
+                    alert('กรุณากรอกนามสกุลผู้สมัคร');
+                    document.querySelector('input[name="last_name"]')?.focus();
+                    return false;
+                }
+
+                const phone = document.querySelector('input[name="phone"]')?.value.trim();
+                if (!phone) {
+                    alert('กรุณากรอกเบอร์โทรศัพท์มือถือของผู้สมัคร');
+                    document.querySelector('input[name="phone"]')?.focus();
+                    return false;
+                }
+
+                const addrNo = document.querySelector('input[name="addr_no"]')?.value.trim();
+                if (!addrNo) {
+                    alert('กรุณากรอกบ้านเลขที่ (ที่อยู่ติดต่อ)');
+                    document.querySelector('input[name="addr_no"]')?.focus();
+                    return false;
+                }
+
+                if (!$('#addr_province').val()) {
+                    alert('กรุณาเลือกจังหวัด (ที่อยู่ผู้สมัคร)');
+                    $('#addr_province').select2('open');
+                    return false;
+                }
+                if (!$('#addr_district').val()) {
+                    alert('กรุณาเลือกอำเภอ (ที่อยู่ผู้สมัคร)');
+                    $('#addr_district').select2('open');
+                    return false;
+                }
+                if (!$('#addr_subdistrict').val()) {
+                    alert('กรุณาเลือกตำบล (ที่อยู่ผู้สมัคร)');
+                    $('#addr_subdistrict').select2('open');
+                    return false;
+                }
+                return true;
+            }
+
+            if (step === 2) {
+                const prevLvl = document.getElementById('prev_level')?.value;
+                if (!prevLvl) {
+                    alert('กรุณาเลือกวุฒิการศึกษาเดิมที่สำเร็จหรือกำลังศึกษา');
+                    document.getElementById('prev_level')?.focus();
+                    return false;
+                }
+
+                const school = document.querySelector('input[name="prev_school"]')?.value.trim();
+                if (!school) {
+                    alert('กรุณาระบุชื่อโรงเรียน/สถานศึกษาเดิม');
+                    document.querySelector('input[name="prev_school"]')?.focus();
+                    return false;
+                }
+
+                if (!$('#prev_province').val()) {
+                    alert('กรุณาเลือกจังหวัดของสถานศึกษาเดิม');
+                    $('#prev_province').select2('open');
+                    return false;
+                }
+                if (!$('#prev_district').val()) {
+                    alert('กรุณาเลือกอำเภอของสถานศึกษาเดิม');
+                    $('#prev_district').select2('open');
+                    return false;
+                }
+                if (!$('#prev_subdistrict').val()) {
+                    alert('กรุณาเลือกตำบลของสถานศึกษาเดิม');
+                    $('#prev_subdistrict').select2('open');
+                    return false;
+                }
+
+                const gpax = parseFloat(document.querySelector('input[name="gpax"]')?.value);
+                if (isNaN(gpax) || gpax < 0 || gpax > 4.00) {
+                    alert('กรุณากรอกผลการเรียนเฉลี่ยสะสม (GPAX) ระหว่าง 0.00 ถึง 4.00');
+                    document.querySelector('input[name="gpax"]')?.focus();
+                    return false;
+                }
+                return true;
+            }
+
+            if (step === 3) {
+                const round = document.querySelector('select[name="round_id"]')?.value;
+                if (!round) {
+                    alert('กรุณาเลือกรอบการรับสมัคร');
+                    return false;
+                }
+
+                const quota = document.querySelector('select[name="quota_type"]')?.value;
+                if (!quota) {
+                    alert('กรุณาเลือกประเภทการสมัคร/โควตา');
+                    return false;
+                }
+
+                const major = document.getElementById('major_id')?.value;
+                if (!major) {
+                    alert('กรุณาเลือกสาขาวิชาที่ต้องการสมัคร');
+                    $('#major_id').select2('open');
+                    return false;
+                }
+
+                if (hiddenLevelId.value === '2') {
+                    const selectedPvs = document.querySelector('input[name="pvs_type"]:checked');
+                    if (!selectedPvs) {
+                        alert('กรุณาเลือกรูปแบบการเข้าศึกษาต่อระดับ ปวส.');
+                        const pvsCont = document.getElementById('pvs_options_container');
+                        if (pvsCont) pvsCont.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            if (step === 4) {
+                // Documents can be attached or verified; permit next step
+                return true;
+            }
+
+            return true;
+        }
+
+        // จัดการเปลี่ยนระบบการเรียน (ปกติ vs ทวิภาคี)
+        function onCurriculumTypeChange(type) {
+            document.getElementById('hidden_curriculum_type').value = type;
+            const cardNormal = document.getElementById('card_curr_normal');
+            const cardDual = document.getElementById('card_curr_dual');
+            const radioNormal = document.getElementById('curr_normal');
+            const radioDual = document.getElementById('curr_dual');
+
+            if (type === 'ระบบทวิภาคี') {
+                if (cardNormal) cardNormal.classList.remove('selected');
+                if (cardDual) cardDual.classList.add('selected');
+                if (radioDual) radioDual.checked = true;
+            } else {
+                if (cardDual) cardDual.classList.remove('selected');
+                if (cardNormal) cardNormal.classList.add('selected');
+                if (radioNormal) radioNormal.checked = true;
+            }
+
+            // ซิงค์กับตัวเลือก ปวส. หากกำลังสมัครระดับ ปวส.
+            if (hiddenLevelId.value === '2') {
+                const prevLvl = document.getElementById('prev_level')?.value;
+                const isDual = (type === 'ระบบทวิภาคี');
+                let targetRadioId = '';
+                if (prevLvl === 'ปวช.3') {
+                    targetRadioId = isDual ? 'pvs_type_3' : 'pvs_type_1';
+                } else {
+                    targetRadioId = isDual ? 'pvs_type_4' : 'pvs_type_2';
+                }
+                const r = document.getElementById(targetRadioId);
+                if (r) {
+                    r.checked = true;
+                    document.querySelectorAll('.pvs-radio-card').forEach(c => c.classList.remove('selected'));
+                    if (r.closest('.pvs-radio-card')) r.closest('.pvs-radio-card').classList.add('selected');
+                }
+            }
+        }
+
+        // จัดการเมื่อเลือกสาขาวิชาเพื่อซิงค์ระบบการเรียน (ปกติ/ทวิภาคี)
+        function onMajorSelectChange(selectEl) {
+            const opt = selectEl.options[selectEl.selectedIndex];
+            if (!opt || !opt.value) return;
+
+            const progType = opt.getAttribute('data-type') || 'ปกติ';
+            const badge = document.getElementById('curriculum_hint_badge');
+            const cardNormal = document.getElementById('card_curr_normal');
+            const cardDual = document.getElementById('card_curr_dual');
+
+            if (progType === 'ทวิภาคี') {
+                onCurriculumTypeChange('ระบบทวิภาคี');
+                if (badge) badge.textContent = 'สาขานี้เปิดรับเฉพาะระบบทวิภาคี';
+                if (cardNormal) {
+                    cardNormal.style.opacity = '0.4';
+                    cardNormal.style.pointerEvents = 'none';
+                }
+                if (cardDual) {
+                    cardDual.style.opacity = '1';
+                    cardDual.style.pointerEvents = 'auto';
+                }
+            } else if (progType === 'ปกติ') {
+                onCurriculumTypeChange('ระบบปกติ');
+                if (badge) badge.textContent = 'สาขานี้เปิดรับเฉพาะระบบปกติ';
+                if (cardDual) {
+                    cardDual.style.opacity = '0.4';
+                    cardDual.style.pointerEvents = 'none';
+                }
+                if (cardNormal) {
+                    cardNormal.style.opacity = '1';
+                    cardNormal.style.pointerEvents = 'auto';
+                }
+            } else {
+                // เปิดรับทั้งสองระบบ
+                if (badge) badge.textContent = 'สาขานี้เปิดรับทั้ง 2 ระบบ (ท่านสามารถคลิกเลือกระบบที่ต้องการได้)';
+                if (cardNormal) {
+                    cardNormal.style.opacity = '1';
+                    cardNormal.style.pointerEvents = 'auto';
+                }
+                if (cardDual) {
+                    cardDual.style.opacity = '1';
+                    cardDual.style.pointerEvents = 'auto';
+                }
+            }
+        }
+
+        // สร้างและแสดงการ์ดสรุปข้อมูลสำหรับ Step 5 (Review & Summary)
+        function renderReviewSummary() {
+            const box = document.getElementById('review_summary_box');
+            if (!box) return;
+
+            // ข้อมูลผู้สมัคร & ที่อยู่
+            const prefix = document.querySelector('select[name="prefix"]')?.value || '';
+            const fname = document.querySelector('input[name="first_name"]')?.value || '';
+            const lname = document.querySelector('input[name="last_name"]')?.value || '';
+            const fullName = (prefix ? prefix + ' ' : '') + fname + ' ' + lname;
+
+            const id1 = document.getElementById('id_box_1')?.value || '';
+            const id2 = document.getElementById('id_box_2')?.value || '';
+            const id3 = document.getElementById('id_box_3')?.value || '';
+            const id4 = document.getElementById('id_box_4')?.value || '';
+            const id5 = document.getElementById('id_box_5')?.value || '';
+            const fullCitizenId = `${id1}-${id2}-${id3}-${id4}-${id5}`;
+
+            const bDay = document.querySelector('select[name="birth_day"]')?.value || '';
+            const bMonthSelect = document.querySelector('select[name="birth_month"]');
+            const bMonth = bMonthSelect?.options[bMonthSelect.selectedIndex]?.text || '';
+            const bYear = document.querySelector('select[name="birth_year"]')?.value || '';
+            const birthDateStr = (bDay && bMonth && bYear) ? `${bDay} ${bMonth} พ.ศ. ${bYear}` : '-';
+
+            const age = document.querySelector('input[name="age"]')?.value || '-';
+            const gender = document.querySelector('input[name="gender"]:checked')?.value === 'male' ? 'ชาย' : (document.querySelector('input[name="gender"]:checked')?.value === 'female' ? 'หญิง' : '-');
+            const nationality = document.querySelector('input[name="nationality"]')?.value || 'ไทย';
+            const religion = document.querySelector('input[name="religion"]')?.value || 'พุทธ';
+            const phone = document.querySelector('input[name="phone"]')?.value || '-';
+            const email = document.querySelector('input[name="email"]')?.value || '-';
+
+            const addrNo = document.querySelector('input[name="addr_no"]')?.value || '';
+            const addrMoo = document.querySelector('input[name="addr_moo"]')?.value ? ' ม.' + document.querySelector('input[name="addr_moo"]')?.value : '';
+            const addrSoi = document.querySelector('input[name="addr_soi"]')?.value ? ' ซ.' + document.querySelector('input[name="addr_soi"]')?.value : '';
+            const addrSubdistrict = document.getElementById('addr_subdistrict')?.value || '';
+            const addrDistrict = document.getElementById('addr_district')?.value || '';
+            const addrProvince = document.getElementById('addr_province')?.value || '';
+            const addrZip = document.getElementById('addr_zipcode')?.value || '';
+            const fullAddress = `เลขที่ ${addrNo}${addrMoo}${addrSoi} ต.${addrSubdistrict} อ.${addrDistrict} จ.${addrProvince} ${addrZip}`;
+
+            // ข้อมูลการศึกษาเดิม & ครอบครัว
+            const prevLevel = document.getElementById('prev_level')?.value || '-';
+            const prevSchool = document.querySelector('input[name="prev_school"]')?.value || '-';
+            const prevProvince = document.getElementById('prev_province')?.value || '';
+            const prevMajor = document.getElementById('prev_major')?.value || '-';
+            const gpax = document.querySelector('input[name="gpax"]')?.value || '-';
+            const specialAbility = document.querySelector('input[name="special_ability"]')?.value || '-';
+
+            const fPrefix = document.querySelector('select[name="father_prefix"]')?.value || '';
+            const fName = document.querySelector('input[name="father_firstname"]')?.value || '';
+            const fLname = document.querySelector('input[name="father_lastname"]')?.value || '';
+            const fPhone = document.querySelector('input[name="father_phone"]')?.value || '';
+            const fatherFull = fName ? `${fPrefix} ${fName} ${fLname} ${fPhone ? '(' + fPhone + ')' : ''}` : '-';
+
+            const mPrefix = document.querySelector('select[name="mother_prefix"]')?.value || '';
+            const mName = document.querySelector('input[name="mother_firstname"]')?.value || '';
+            const mLname = document.querySelector('input[name="mother_lastname"]')?.value || '';
+            const mPhone = document.querySelector('input[name="mother_phone"]')?.value || '';
+            const motherFull = mName ? `${mPrefix} ${mName} ${mLname} ${mPhone ? '(' + mPhone + ')' : ''}` : '-';
+
+            // ข้อมูลหลักสูตรที่สมัคร
+            const targetLvlRadio = document.querySelector('input[name="display_level"]:checked')?.value;
+            let targetLvlName = 'ประกาศนียบัตรวิชาชีพ (ปวช.)';
+            if (targetLvlRadio === '2') targetLvlName = 'ประกาศนียบัตรวิชาชีพชั้นสูง (ปวส.)';
+            if (targetLvlRadio === '3') targetLvlName = 'ปริญญาตรี (ทล.บ.)';
+
+            const majorSelect = document.getElementById('major_id');
+            const majorOption = majorSelect?.options[majorSelect.selectedIndex];
+            const majorText = majorOption ? majorOption.text : '-';
+
+            const curriculumVal = document.getElementById('hidden_curriculum_type')?.value || 'ระบบปกติ';
+            const isDual = curriculumVal.includes('ทวิภาคี');
+            const currBadge = isDual 
+                ? '<span class="badge bg-success px-3 py-1 fs-6"><i class="bi bi-briefcase me-1"></i>ระบบทวิภาคี (Dual / DVE)</span>' 
+                : '<span class="badge bg-danger px-3 py-1 fs-6"><i class="bi bi-building me-1"></i>ระบบปกติ (Regular)</span>';
+
+            const roundSelect = document.querySelector('select[name="round_id"]');
+            const roundText = roundSelect?.options[roundSelect.selectedIndex]?.text || '-';
+            const quotaText = document.querySelector('select[name="quota_type"]')?.value || '-';
+
+            const pvsSelected = document.querySelector('input[name="pvs_type"]:checked')?.value || '';
+
+            // เอกสารแนบ
+            const photoInput = document.getElementById('file_photo');
+            const idcardInput = document.getElementById('file_idcard');
+            const transcriptInput = document.getElementById('file_transcript');
+            const photoImgSrc = document.getElementById('photoPreviewImg')?.src;
+            const hasPhotoPreview = photoImgSrc && !photoImgSrc.endsWith('register.php') && photoImgSrc.length > 20;
+
+            box.innerHTML = `
+                <!-- Card 1: ข้อมูลหลักสูตรและสาขาที่สมัคร -->
+                <div class="review-card">
+                    <div class="review-card-header">
+                        <h5 class="review-card-title">
+                            <i class="bi bi-mortarboard-fill"></i> ข้อมูลหลักสูตรและสาขาวิชาที่สมัคร
+                        </h5>
+                        <button type="button" class="review-edit-btn" onclick="goToStep(3)">
+                            <i class="bi bi-pencil-square me-1"></i> แก้ไขหลักสูตร
+                        </button>
+                    </div>
+                    <table class="table table-borderless review-table mb-0">
+                        <tr>
+                            <th>ระดับที่สมัคร:</th>
+                            <td><span class="badge bg-dark text-white px-2 py-1 fs-6">${targetLvlName}</span></td>
+                        </tr>
+                        <tr>
+                            <th>ระบบการเรียน:</th>
+                            <td>${currBadge}</td>
+                        </tr>
+                        <tr>
+                            <th>สาขาวิชา:</th>
+                            <td class="fw-bold text-danger fs-6">${majorText}</td>
+                        </tr>
+                        ${pvsSelected ? `
+                        <tr>
+                            <th>รูปแบบ ปวส.:</th>
+                            <td><span class="badge bg-warning-subtle text-warning-emphasis border border-warning">${pvsSelected}</span></td>
+                        </tr>
+                        ` : ''}
+                        <tr>
+                            <th>รอบการสมัคร:</th>
+                            <td>${roundText} (${quotaText})</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- Card 2: ข้อมูลส่วนตัวผู้สมัคร -->
+                <div class="review-card">
+                    <div class="review-card-header">
+                        <h5 class="review-card-title">
+                            <i class="bi bi-person-circle"></i> ข้อมูลส่วนตัวผู้สมัครและที่อยู่
+                        </h5>
+                        <button type="button" class="review-edit-btn" onclick="goToStep(1)">
+                            <i class="bi bi-pencil-square me-1"></i> แก้ไขข้อมูลผู้สมัคร
+                        </button>
+                    </div>
+                    <div class="row align-items-center">
+                        ${hasPhotoPreview ? `
+                        <div class="col-md-3 text-center mb-3 mb-md-0">
+                            <img src="${photoImgSrc}" alt="รูปถ่ายผู้สมัคร" style="width: 100px; height: 125px; object-fit: cover; border-radius: 8px; border: 2px solid #cbd5e1; box-shadow: 0 4px 10px rgba(0,0,0,0.08);">
+                            <div class="small text-muted mt-1">รูปถ่ายหน้าตรง</div>
+                        </div>
+                        ` : ''}
+                        <div class="${hasPhotoPreview ? 'col-md-9' : 'col-12'}">
+                            <table class="table table-borderless review-table mb-0">
+                                <tr>
+                                    <th>ชื่อ - นามสกุล:</th>
+                                    <td class="fw-bold fs-6 text-dark">${fullName}</td>
+                                </tr>
+                                <tr>
+                                    <th>เลขประจำตัวประชาชน:</th>
+                                    <td><span class="font-monospace fw-bold bg-light border px-2 py-1 rounded">${fullCitizenId}</span></td>
+                                </tr>
+                                <tr>
+                                    <th>วันเกิด / อายุ:</th>
+                                    <td>${birthDateStr} (อายุ ${age} ปี) • เพศ: ${gender}</td>
+                                </tr>
+                                <tr>
+                                    <th>สัญชาติ / ศาสนา:</th>
+                                    <td>${nationality} / ${religion}</td>
+                                </tr>
+                                <tr>
+                                    <th>เบอร์โทรศัพท์:</th>
+                                    <td><strong class="text-primary">${phone}</strong> (อีเมล: ${email})</td>
+                                </tr>
+                                <tr>
+                                    <th>ที่อยู่ติดต่อ:</th>
+                                    <td>${fullAddress}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: ประวัติการศึกษาเดิมและครอบครัว -->
+                <div class="review-card">
+                    <div class="review-card-header">
+                        <h5 class="review-card-title">
+                            <i class="bi bi-journal-bookmark-fill"></i> ประวัติการศึกษาเดิมและครอบครัว
+                        </h5>
+                        <button type="button" class="review-edit-btn" onclick="goToStep(2)">
+                            <i class="bi bi-pencil-square me-1"></i> แก้ไขประวัติการศึกษา
+                        </button>
+                    </div>
+                    <table class="table table-borderless review-table mb-0">
+                        <tr>
+                            <th>วุฒิการศึกษาเดิม:</th>
+                            <td><span class="badge bg-secondary-subtle text-secondary border px-2 py-1">${prevLevel}</span></td>
+                        </tr>
+                        <tr>
+                            <th>สถานศึกษาเดิม:</th>
+                            <td><strong>${prevSchool}</strong> ${prevProvince ? '(จ.' + prevProvince + ')' : ''}</td>
+                        </tr>
+                        <tr>
+                            <th>เกรดเฉลี่ยสะสม (GPAX):</th>
+                            <td><span class="badge bg-success-subtle text-success fs-6 fw-bold border border-success-subtle">${gpax}</span> (สาขาเดิม: ${prevMajor})</td>
+                        </tr>
+                        <tr>
+                            <th>ความสามารถพิเศษ:</th>
+                            <td>${specialAbility}</td>
+                        </tr>
+                        <tr>
+                            <th>ข้อมูลบิดา:</th>
+                            <td>${fatherFull}</td>
+                        </tr>
+                        <tr>
+                            <th>ข้อมูลมารดา:</th>
+                            <td>${motherFull}</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- Card 4: เอกสารหลักฐาน -->
+                <div class="review-card">
+                    <div class="review-card-header">
+                        <h5 class="review-card-title">
+                            <i class="bi bi-file-earmark-check-fill"></i> เอกสารหลักฐานประกอบการสมัคร
+                        </h5>
+                        <button type="button" class="review-edit-btn" onclick="goToStep(4)">
+                            <i class="bi bi-pencil-square me-1"></i> แก้ไขเอกสาร
+                        </button>
+                    </div>
+                    <div class="d-flex flex-column gap-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi ${photoInput?.files?.[0] ? 'bi-check-circle-fill text-success' : 'bi-dash-circle text-muted'}"></i>
+                            <span>รูปถ่ายหน้าตรง:</span>
+                            <strong class="text-secondary">${photoInput?.files?.[0]?.name || 'ยังไม่ได้แนบไฟล์ (สามารถแนบภายหลังได้)'}</strong>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi ${idcardInput?.files?.[0] ? 'bi-check-circle-fill text-success' : 'bi-dash-circle text-muted'}"></i>
+                            <span>สำเนาบัตรประชาชน:</span>
+                            <strong class="text-secondary">${idcardInput?.files?.[0]?.name || 'ยังไม่ได้แนบไฟล์ (สามารถแนบภายหลังได้)'}</strong>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi ${transcriptInput?.files?.[0] ? 'bi-check-circle-fill text-success' : 'bi-dash-circle text-muted'}"></i>
+                            <span>สำเนา ปพ.1 / Transcript:</span>
+                            <strong class="text-secondary">${transcriptInput?.files?.[0]?.name || 'ยังไม่ได้แนบไฟล์ (สามารถแนบภายหลังได้)'}</strong>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ตรวจสอบความถูกต้องก่อนส่งฟอร์ม (Form Submit Handler)
         document.getElementById('admissionForm').addEventListener('submit', function(e) {
             updateFullIdCard();
-            if (hiddenIdCard.value.length !== 13) {
-                alert('กรุณากรอกเลขประจำตัวประชาชนให้ครบ 13 หลัก');
-                idBoxes[0].focus();
+
+            if (currentStep !== 5) {
+                goToStep(5);
                 e.preventDefault();
                 return false;
             }
 
-            // ตรวจสอบข้อมูลที่อยู่ (ทั้งข้อ 2 และข้อ 4)
-            const requiredAddressSelects = [
-                { id: 'addr_province', label: 'จังหวัด (ที่อยู่ผู้สมัคร ในข้อ 2)' },
-                { id: 'addr_district', label: 'อำเภอ (ที่อยู่ผู้สมัคร ในข้อ 2)' },
-                { id: 'addr_subdistrict', label: 'ตำบล (ที่อยู่ผู้สมัคร ในข้อ 2)' },
-                { id: 'prev_province', label: 'จังหวัด (สถานศึกษาเดิม ในข้อ 4)' },
-                { id: 'prev_district', label: 'อำเภอ (สถานศึกษาเดิม ในข้อ 4)' },
-                { id: 'prev_subdistrict', label: 'ตำบล (สถานศึกษาเดิม ในข้อ 4)' }
-            ];
-            for (let f of requiredAddressSelects) {
-                const val = $('#' + f.id).val();
-                if (!val) {
-                    alert('กรุณาเลือก ' + f.label);
-                    $('#' + f.id).select2('open');
-                    e.preventDefault();
-                    return false;
-                }
-            }
-
-            // ถ้าเป็นการเข้าศึกษาต่อระดับ ปวส. ต้องเลือกรูปแบบในภาพที่สองด้วย
-            if (hiddenLevelId.value === '2') {
-                const selectedPvs = document.querySelector('input[name="pvs_type"]:checked');
-                if (!selectedPvs) {
-                    alert('กรุณาเลือกรูปแบบการเข้าศึกษาต่อระดับ ปวส. ในข้อ 5');
-                    const pvsCont = document.getElementById('pvs_options_container');
-                    if (pvsCont) pvsCont.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    e.preventDefault();
-                    return false;
-                }
-            }
-
             if (!document.getElementById('certifyCheck').checked) {
                 alert('กรุณาคลิกรับรองว่าข้อมูลและหลักฐานเป็นความจริง');
+                document.getElementById('certifyCheck').focus();
                 e.preventDefault();
                 return false;
             }
 
             if (!document.getElementById('pdpaCheck').checked) {
                 alert('กรุณาคลิกยินยอมตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล (PDPA)');
+                document.getElementById('pdpaCheck').focus();
                 e.preventDefault();
                 return false;
+            }
+
+            const btn = document.getElementById('btnFinalSubmit');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>กำลังบันทึกข้อมูล...';
             }
         });
 

@@ -44,6 +44,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $program_id = !empty($_POST['major_id']) ? intval($_POST['major_id']) : 60;
         $level_id = !empty($_POST['level_id']) ? intval($_POST['level_id']) : 1;
         $pvs_type = trim($_POST['pvs_type'] ?? '');
+        $curriculum_type = trim($_POST['curriculum_type'] ?? 'ระบบปกติ');
+        if (empty($curriculum_type)) {
+            $curriculum_type = 'ระบบปกติ';
+        }
+        if (empty($pvs_type)) {
+            $pvs_type = $education_level . ' ' . $curriculum_type;
+        }
 
         // แปลง level_id เป็นค่า enum ของตาราง applicants
         $edu_map = [
@@ -191,7 +198,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         // 9. SQL บันทึกข้อมูลลงตาราง applicants (Unified)
         $sql = "INSERT INTO applicants 
-                (citizen_id, application_no, round_id, admission_round, quota_type, academic_year, education_level, program_id, pvs_type,
+                (citizen_id, application_no, round_id, admission_round, quota_type, academic_year, education_level, program_id, pvs_type, curriculum_type,
                  prefix, first_name, last_name, gender, birthdate, age, nationality, religion,
                  addr_no, addr_moo, addr_soi, addr_road, addr_subdistrict, addr_district, addr_province, addr_zipcode, address,
                  phone, email, password,
@@ -201,7 +208,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                  prev_level, previous_school, prev_subdistrict, prev_district, prev_province, prev_zipcode, prev_phone, prev_major, gpa, special_ability,
                  file_photo, file_transcript, file_idcard, pdpa_consent, status) 
                 VALUES 
-                (:citizen_id, :application_no, :round_id, :admission_round, :quota_type, :academic_year, :education_level, :program_id, :pvs_type,
+                (:citizen_id, :application_no, :round_id, :admission_round, :quota_type, :academic_year, :education_level, :program_id, :pvs_type, :curriculum_type,
                  :prefix, :first_name, :last_name, :gender, :birthdate, :age, :nationality, :religion,
                  :addr_no, :addr_moo, :addr_soi, :addr_road, :addr_subdistrict, :addr_district, :addr_province, :addr_zipcode, :address,
                  :phone, :email, :password,
@@ -222,6 +229,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             ':education_level'  => $education_level,
             ':program_id'       => $program_id,
             ':pvs_type'         => $pvs_type,
+            ':curriculum_type'  => $curriculum_type,
             ':prefix'           => $prefix,
             ':first_name'       => $firstname,
             ':last_name'        => $lastname,

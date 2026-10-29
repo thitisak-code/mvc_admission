@@ -961,102 +961,11 @@ $user_citizen_id = $_SESSION['citizen_id'] ?? '';
     </div>
   </div>
 
-  <!-- Top Announcement Bar (เน้นสีแดงสถาบัน Deep Crimson #6F1420) -->
-  <header class="topbar py-2">
-    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-2">
-      <div class="d-flex align-items-center gap-2">
-        <i class="bi bi-geo-alt-fill text-warning"></i>
-        <span><?= htmlspecialchars($hp['topbar_address']) ?></span>
-      </div>
-      <div class="d-flex align-items-center gap-3">
-        <span><i class="bi bi-telephone-fill me-1"></i> โทร. <?= htmlspecialchars($hp['topbar_phone']) ?></span>
-        <span class="d-none d-md-inline opacity-50">|</span>
-        <span class="topbar-badge d-none d-md-inline-block">
-          <i class="bi bi-mortarboard-fill me-1"></i> <?= htmlspecialchars($hp['topbar_badge']) ?>
-        </span>
-      </div>
-    </div>
-  </header>
-
-  <!-- Navigation Bar (Clean White Surface with Red Brand Identity) -->
-  <nav class="navbar navbar-expand-lg sticky-top" aria-label="เมนูหลัก">
-    <div class="container">
-      <a class="navbar-brand brand-title" href="#">
-        <img src="<?= htmlspecialchars($hp['site_logo']) ?>" alt="ตราสัญลักษณ์" class="brand-logo-img">
-        <div>
-          <div style="line-height: 1.15;"><?= htmlspecialchars($hp['navbar_title']) ?></div>
-          <small style="font-size: 0.725rem; font-weight: 600; color: var(--color-primary);">
-            <?= htmlspecialchars($hp['navbar_subtitle']) ?>
-          </small>
-        </div>
-      </a>
-
-      <button class="navbar-toggler" type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#mainMenu"
-              aria-controls="mainMenu"
-              aria-expanded="false"
-              aria-label="เปิด/ปิด เมนูนำทาง">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
-      <div class="collapse navbar-collapse" id="mainMenu">
-        <ul class="navbar-nav ms-auto gap-lg-1 align-items-lg-center">
-          <li class="nav-item">
-            <a class="nav-link active" href="index.php"><i class="bi bi-house-door me-1"></i> หน้าแรก</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="programs.php"><i class="bi bi-mortarboard me-1"></i> สาขาวิชาที่เปิดรับ</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="register.php"><i class="bi bi-pencil-square me-1"></i> สมัครเรียนออนไลน์</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="status.php"><i class="bi bi-search me-1"></i> ตรวจสอบสถานะ</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="print_application.php"><i class="bi bi-printer me-1"></i> พิมพ์ใบสมัคร/เอกสาร</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#contact">ติดต่อเรา</a>
-          </li>
-          <?php if ($is_logged_in): ?>
-            <li class="nav-item dropdown ms-lg-2 mt-2 mt-lg-0">
-              <button class="btn btn-danger dropdown-toggle py-2 px-3 d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.9rem; background-color: var(--color-primary); border-color: var(--color-primary); border-radius: 8px;">
-                <?php if ($user_type === 'admin'): ?>
-                  <i class="bi bi-shield-lock-fill"></i>
-                  <span>ผู้ดูแลระบบ: <?= htmlspecialchars($user_name) ?></span>
-                <?php else: ?>
-                  <i class="bi bi-person-circle"></i>
-                  <span><?= htmlspecialchars($user_name) ?></span>
-                <?php endif; ?>
-              </button>
-              <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3 mt-1">
-                <?php if ($user_type === 'admin'): ?>
-                  <li><a class="dropdown-item py-2" href="admin.php?tab=applicants"><i class="bi bi-people text-danger me-2"></i> จัดการผู้สมัครเรียน</a></li>
-                  <li><a class="dropdown-item py-2" href="admin.php?tab=departments"><i class="bi bi-mortarboard text-warning me-2"></i> จัดการแผนกและสาขาวิชา</a></li>
-                  <li><a class="dropdown-item py-2" href="admin.php?tab=rounds"><i class="bi bi-calendar2-week text-info me-2"></i> จัดการรอบการรับสมัคร</a></li>
-                  <li><a class="dropdown-item py-2" href="admin.php?tab=admins"><i class="bi bi-shield-person text-primary me-2"></i> จัดการผู้ดูแลระบบ</a></li>
-                  <li><a class="dropdown-item py-2 text-danger fw-semibold" href="admin.php?tab=homepage"><i class="bi bi-layout-text-window-reverse me-2"></i> ปรับแต่งหน้าแรก (Index)</a></li>
-                <?php else: ?>
-                  <li><a class="dropdown-item py-2" href="status.php?citizen_id=<?= urlencode($user_citizen_id) ?>"><i class="bi bi-card-checklist text-danger me-2"></i> สถานะการสมัครของฉัน</a></li>
-                  <li><a class="dropdown-item py-2" href="print_application.php?search=<?= urlencode($user_citizen_id) ?>"><i class="bi bi-printer-fill text-primary me-2"></i> พิมพ์ใบสมัคร / แนบเอกสาร</a></li>
-                <?php endif; ?>
-                <li><hr class="dropdown-divider my-1"></li>
-                <li><a class="dropdown-item py-2 text-danger fw-semibold" href="logout.php"><i class="bi bi-box-arrow-right me-2"></i> ออกจากระบบ</a></li>
-              </ul>
-            </li>
-          <?php else: ?>
-            <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
-              <a href="login.php" class="btn btn-outline-red py-2 px-3" style="font-size: 0.9rem;">
-                <i class="bi bi-person-fill"></i> เข้าสู่ระบบ
-              </a>
-            </li>
-          <?php endif; ?>
-        </ul>
-      </div>
-    </div>
-  </nav>
+  <!-- Unified Header & Mobile Bottom Navigation Bar -->
+  <?php 
+    $current_page = 'index';
+    require __DIR__ . '/includes/navbar.php'; 
+  ?>
 
   <main id="main-content">
     <!-- Hero Section (เน้นสีแดงสถาบัน พร้อมโครงสร้างสะอาดตา) -->

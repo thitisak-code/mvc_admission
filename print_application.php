@@ -751,26 +751,11 @@ $province_clean = $applicant ? valOrDash(preg_replace('/^(จังหวัด|
 </head>
 <body>
 
-    <!-- Top Navbar -->
-    <header class="top-navbar no-print">
-        <div class="d-flex align-items-center justify-content-between">
-            <div class="d-flex align-items-center gap-2 gap-md-3 flex-shrink-0">
-                <a href="index.php" class="brand-logo-area" title="วิทยาลัยอาชีวศึกษามหาสารคาม">
-                    <img src="assets/images/mvc_round_seal.png?v=<?= time() ?>" alt="สัญลักษณ์ วิทยาลัยอาชีวศึกษามหาสารคาม" class="brand-logo-img">
-                    <div class="brand-title-box d-none d-sm-flex">
-                        <span class="brand-title-th">วิทยาลัยอาชีวศึกษามหาสารคาม</span>
-                        <span class="brand-title-en">Mahasarakham Vocational College</span>
-                    </div>
-                </a>
-            </div>
-
-            <div class="d-flex align-items-center gap-3">
-                <div class="user-avatar-circle" title="Guest">
-                    <img src="assets/images/mvc_round_seal.png?v=<?= time() ?>" alt="User Avatar">
-                </div>
-            </div>
-        </div>
-    </header>
+    <!-- Shared Unified Navbar & Mobile Bottom Navigation -->
+    <?php 
+      $current_page = 'print';
+      require __DIR__ . '/includes/navbar.php'; 
+    ?>
 
     <!-- Main Page Container with Sidebar -->
     <div class="container-fluid">
@@ -1335,9 +1320,9 @@ $province_clean = $applicant ? valOrDash(preg_replace('/^(จังหวัด|
                                 </div>
                                 <div class="print-form-row" style="margin-top: 6px;">
                                     <span class="lbl">สมัครเข้าศึกษาต่อ สาขาวิชา</span>
-                                    <span class="val flex-grow-1" style="min-width: 220px;"><?= htmlspecialchars(valOrDash($applicant['major_name'] ?? '')) ?></span>
-                                    <span class="lbl">สาขางาน</span>
                                     <span class="val flex-grow-1" style="min-width: 200px;"><?= htmlspecialchars(valOrDash($applicant['major_name'] ?? '')) ?></span>
+                                    <span class="lbl">ระบบการเรียน</span>
+                                    <span class="val" style="min-width: 120px; font-weight: bold;"><?= htmlspecialchars(!empty($applicant['curriculum_type']) ? $applicant['curriculum_type'] : ($is_pvs && strpos($pvs_t, 'ทวิภาคี') !== false ? 'ระบบทวิภาคี' : 'ระบบปกติ')) ?></span>
                                 </div>
 
                                 <!-- 3. ประวัติการศึกษา -->

@@ -24,6 +24,7 @@ try {
                p.program_code,
                p.program_name AS major_name,
                p.education_level AS level_name,
+               p.program_type,
                p.seats_available,
                p.status,
                d.id AS dept_id,
@@ -50,6 +51,7 @@ try {
                    p.program_code,
                    p.program_name AS major_name,
                    p.education_level AS level_name,
+                   p.program_type,
                    p.seats_available,
                    p.status,
                    d.id AS dept_id,
@@ -624,74 +626,11 @@ $user_citizen_id = $_SESSION['citizen_id'] ?? '';
     </div>
   </div>
 
-  <!-- Topbar -->
-  <header class="topbar py-2">
-    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-2">
-      <div class="d-flex align-items-center gap-2">
-        <i class="bi bi-geo-alt-fill text-warning"></i>
-        <span><?= htmlspecialchars($hp['topbar_address']) ?></span>
-      </div>
-      <div class="d-flex align-items-center gap-3">
-        <span><i class="bi bi-telephone-fill me-1"></i> โทร. <?= htmlspecialchars($hp['topbar_phone']) ?></span>
-        <span class="d-none d-md-inline opacity-50">|</span>
-        <span class="topbar-badge d-none d-md-inline-block">
-          <i class="bi bi-mortarboard-fill me-1"></i> ปีการศึกษา <?= htmlspecialchars($active_year) ?>
-        </span>
-      </div>
-    </div>
-  </header>
-
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg sticky-top">
-    <div class="container">
-      <a class="navbar-brand brand-title" href="index.php">
-        <img src="img/Logo-W.png" alt="ตราสัญลักษณ์" class="brand-logo-img">
-        <div>
-          <div style="line-height: 1.15;"><?= htmlspecialchars($hp['navbar_title']) ?></div>
-          <small style="font-size: 0.725rem; font-weight: 600; color: var(--color-primary);">
-            <?= htmlspecialchars($hp['navbar_subtitle']) ?>
-          </small>
-        </div>
-      </a>
-
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainMenu" aria-controls="mainMenu" aria-expanded="false" aria-label="เปิด/ปิด เมนูนำทาง">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
-      <div class="collapse navbar-collapse" id="mainMenu">
-        <ul class="navbar-nav ms-auto gap-lg-1 align-items-lg-center">
-          <li class="nav-item">
-            <a class="nav-link" href="index.php"><i class="bi bi-house-door me-1"></i> หน้าแรก</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link active" href="programs.php"><i class="bi bi-mortarboard me-1"></i> สาขาวิชาที่เปิดรับ</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="register.php"><i class="bi bi-pencil-square me-1"></i> สมัครเรียนออนไลน์</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="status.php"><i class="bi bi-search me-1"></i> ตรวจสอบสถานะ</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="print_application.php"><i class="bi bi-printer me-1"></i> พิมพ์ใบสมัคร/เอกสาร</a>
-          </li>
-          <?php if ($is_logged_in): ?>
-            <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
-              <a href="<?= $user_type === 'admin' ? 'admin.php' : 'status.php' ?>" class="btn btn-outline-danger btn-sm py-2 px-3">
-                <i class="bi bi-person-fill"></i> <?= htmlspecialchars($user_name) ?>
-              </a>
-            </li>
-          <?php else: ?>
-            <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
-              <a href="login.php" class="btn btn-outline-danger btn-sm py-2 px-3">
-                <i class="bi bi-shield-lock"></i> เจ้าหน้าที่
-              </a>
-            </li>
-          <?php endif; ?>
-        </ul>
-      </div>
-    </div>
-  </nav>
+  <!-- Unified Header & Mobile Bottom Navigation Bar -->
+  <?php 
+    $current_page = 'programs';
+    require __DIR__ . '/includes/navbar.php'; 
+  ?>
 
   <!-- Hero Header -->
   <section class="programs-hero text-center">
@@ -845,9 +784,16 @@ $user_citizen_id = $_SESSION['citizen_id'] ?? '';
                 </span>
               </div>
 
-              <!-- Program Code -->
-              <div>
+              <!-- Program Code & Curriculum Type -->
+              <div class="d-flex align-items-center gap-1 flex-wrap mb-1">
                 <span class="program-code-badge">รหัส <?= htmlspecialchars($p['program_code']) ?></span>
+                <?php if (($p['program_type'] ?? '') === 'ทวิภาคี'): ?>
+                  <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1" style="font-size: 0.725rem;"><i class="bi bi-briefcase me-1"></i>ระบบทวิภาคี</span>
+                <?php elseif (($p['program_type'] ?? '') === 'ปกติและทวิภาคี'): ?>
+                  <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle rounded-pill px-2 py-1" style="font-size: 0.725rem;"><i class="bi bi-arrow-repeat me-1"></i>ปกติ & ทวิภาคี</span>
+                <?php else: ?>
+                  <span class="badge bg-light text-secondary border rounded-pill px-2 py-1" style="font-size: 0.725rem;"><i class="bi bi-building me-1"></i>ระบบปกติ</span>
+                <?php endif; ?>
               </div>
 
               <!-- Program Title -->

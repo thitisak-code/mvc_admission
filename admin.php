@@ -476,12 +476,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $program_code  = trim($_POST['program_code'] ?? '');
     $program_name  = trim($_POST['program_name'] ?? '');
     $edu_level     = trim($_POST['education_level'] ?? '');
+    $program_type  = trim($_POST['program_type'] ?? 'ปกติ');
     $seats         = (int)($_POST['seats_available'] ?? 40);
     $status        = trim($_POST['status'] ?? 'open');
     $view          = trim($_POST['view'] ?? 'matrix');
     $academic_year = trim($_POST['academic_year'] ?? $selected_year);
 
     $valid_levels = ['ปวช.', 'ปวส.', 'ปริญญาตรี'];
+    $valid_types  = ['ปกติ', 'ทวิภาคี', 'ปกติและทวิภาคี'];
+    if (!in_array($program_type, $valid_types, true)) {
+        $program_type = 'ปกติ';
+    }
 
     if ($dept_id <= 0 || empty($program_code) || empty($program_name) || !in_array($edu_level, $valid_levels, true)) {
         header("Location: admin.php?tab=departments&view={$view}&academic_year={$academic_year}&err=" . urlencode("กรุณากรอกข้อมูลสาขาวิชาให้ครบถ้วน"));
@@ -490,19 +495,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
     try {
         $stmt = $pdo->prepare("
-            INSERT INTO programs (dept_id, program_code, program_name, education_level, seats_available, status, academic_year)
-            VALUES (:dept_id, :code, :name, :level, :seats, :status, :year)
+            INSERT INTO programs (dept_id, program_code, program_name, education_level, program_type, seats_available, status, academic_year)
+            VALUES (:dept_id, :code, :name, :level, :type, :seats, :status, :year)
         ");
         $stmt->execute([
             ':dept_id' => $dept_id,
             ':code'    => strtoupper($program_code),
             ':name'    => $program_name,
             ':level'   => $edu_level,
+            ':type'    => $program_type,
             ':seats'   => $seats > 0 ? $seats : 40,
             ':status'  => in_array($status, ['open', 'closed'], true) ? $status : 'open',
             ':year'    => $academic_year,
         ]);
-        header("Location: admin.php?tab=departments&view={$view}&academic_year={$academic_year}&msg=" . urlencode("เปิดรับสมัครสาขาวิชา '{$program_name}' ({$edu_level}) ปีการศึกษา {$academic_year} เรียบร้อยแล้ว"));
+        header("Location: admin.php?tab=departments&view={$view}&academic_year={$academic_year}&msg=" . urlencode("เปิดรับสมัครสาขาวิชา '{$program_name}' ({$edu_level} - {$program_type}) ปีการศึกษา {$academic_year} เรียบร้อยแล้ว"));
         exit;
     } catch (PDOException $e) {
         header("Location: admin.php?tab=departments&view={$view}&academic_year={$academic_year}&err=" . urlencode("เกิดข้อผิดพลาด: " . $e->getMessage()));
@@ -517,12 +523,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $program_code = trim($_POST['program_code'] ?? '');
     $program_name = trim($_POST['program_name'] ?? '');
     $edu_level    = trim($_POST['education_level'] ?? '');
+    $program_type = trim($_POST['program_type'] ?? 'ปกติ');
     $seats        = (int)($_POST['seats_available'] ?? 40);
     $status       = trim($_POST['status'] ?? 'open');
     $view         = trim($_POST['view'] ?? 'matrix');
     $academic_year = trim($_POST['academic_year'] ?? $selected_year);
 
     $valid_levels = ['ปวช.', 'ปวส.', 'ปริญญาตรี'];
+    $valid_types  = ['ปกติ', 'ทวิภาคี', 'ปกติและทวิภาคี'];
+    if (!in_array($program_type, $valid_types, true)) {
+        $program_type = 'ปกติ';
+    }
 
     if ($prog_id <= 0 || $dept_id <= 0 || empty($program_code) || empty($program_name) || !in_array($edu_level, $valid_levels, true)) {
         header("Location: admin.php?tab=departments&view={$view}&academic_year={$academic_year}&err=" . urlencode("ข้อมูลการแก้ไขสาขาวิชาไม่ถูกต้อง"));
@@ -532,7 +543,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     try {
         $stmt = $pdo->prepare("
             UPDATE programs 
-            SET dept_id = :dept_id, program_code = :code, program_name = :name, education_level = :level, seats_available = :seats, status = :status
+            SET dept_id = :dept_id, program_code = :code, program_name = :name, education_level = :level, program_type = :type, seats_available = :seats, status = :status
             WHERE id = :id
         ");
         $stmt->execute([
@@ -540,11 +551,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             ':code'    => strtoupper($program_code),
             ':name'    => $program_name,
             ':level'   => $edu_level,
+            ':type'    => $program_type,
             ':seats'   => $seats > 0 ? $seats : 40,
             ':status'  => in_array($status, ['open', 'closed'], true) ? $status : 'open',
             ':id'      => $prog_id,
         ]);
-        header("Location: admin.php?tab=departments&view={$view}&academic_year={$academic_year}&msg=" . urlencode("แก้ไขข้อมูลสาขาวิชา '{$program_name}' เรียบร้อยแล้ว"));
+        header("Location: admin.php?tab=departments&view={$view}&academic_year={$academic_year}&msg=" . urlencode("แก้ไขข้อมูลสาขาวิชา '{$program_name}' ({$program_type}) เรียบร้อยแล้ว"));
         exit;
     } catch (PDOException $e) {
         header("Location: admin.php?tab=departments&view={$view}&academic_year={$academic_year}&err=" . urlencode("เกิดข้อผิดพลาด: " . $e->getMessage()));
@@ -2057,6 +2069,11 @@ function getAdminStatusBadge($st) {
                       <span class="badge badge-level <?= $levelClass ?> mb-1">
                         <?= htmlspecialchars($app['education_level']) ?>
                       </span>
+                      <?php if (!empty($app['curriculum_type'])): ?>
+                        <span class="badge <?= $app['curriculum_type'] === 'ระบบทวิภาคี' ? 'bg-warning text-dark' : 'bg-primary-subtle text-primary border border-primary-subtle' ?> mb-1" style="font-size: 0.72rem;">
+                          <?= htmlspecialchars($app['curriculum_type']) ?>
+                        </span>
+                      <?php endif; ?>
                       <div class="small fw-semibold text-truncate" style="max-width: 250px;" title="<?= htmlspecialchars($app['program_name'] ?? '') ?>">
                         <?= htmlspecialchars($app['program_name'] ?? 'ไม่ได้ระบุสาขา') ?>
                       </div>
@@ -2404,6 +2421,13 @@ function getAdminStatusBadge($st) {
                                 <span class="badge bg-light text-dark border font-monospace" style="font-size: 0.7rem;">
                                   <?= htmlspecialchars($prog['program_code']) ?>
                                 </span>
+                                <?php if (($prog['program_type'] ?? '') === 'ทวิภาคี'): ?>
+                                  <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.68rem;">ทวิภาคี</span>
+                                <?php elseif (($prog['program_type'] ?? '') === 'ปกติและทวิภาคี'): ?>
+                                  <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle" style="font-size: 0.68rem;">ปกติ/ทวิ</span>
+                                <?php else: ?>
+                                  <span class="badge bg-light text-secondary border" style="font-size: 0.68rem;">ปกติ</span>
+                                <?php endif; ?>
                                 <div class="fw-bold text-dark small mt-1">
                                   <?= htmlspecialchars($prog['program_name']) ?>
                                 </div>
@@ -2480,6 +2504,13 @@ function getAdminStatusBadge($st) {
                                 <span class="badge bg-light text-dark border font-monospace" style="font-size: 0.7rem;">
                                   <?= htmlspecialchars($prog['program_code']) ?>
                                 </span>
+                                <?php if (($prog['program_type'] ?? '') === 'ทวิภาคี'): ?>
+                                  <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.68rem;">ทวิภาคี</span>
+                                <?php elseif (($prog['program_type'] ?? '') === 'ปกติและทวิภาคี'): ?>
+                                  <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle" style="font-size: 0.68rem;">ปกติ/ทวิ</span>
+                                <?php else: ?>
+                                  <span class="badge bg-light text-secondary border" style="font-size: 0.68rem;">ปกติ</span>
+                                <?php endif; ?>
                                 <div class="fw-bold text-dark small mt-1">
                                   <?= htmlspecialchars($prog['program_name']) ?>
                                 </div>
@@ -2555,6 +2586,13 @@ function getAdminStatusBadge($st) {
                                 <span class="badge bg-light text-dark border font-monospace" style="font-size: 0.7rem;">
                                   <?= htmlspecialchars($prog['program_code']) ?>
                                 </span>
+                                <?php if (($prog['program_type'] ?? '') === 'ทวิภาคี'): ?>
+                                  <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.68rem;">ทวิภาคี</span>
+                                <?php elseif (($prog['program_type'] ?? '') === 'ปกติและทวิภาคี'): ?>
+                                  <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle" style="font-size: 0.68rem;">ปกติ/ทวิ</span>
+                                <?php else: ?>
+                                  <span class="badge bg-light text-secondary border" style="font-size: 0.68rem;">ปกติ</span>
+                                <?php endif; ?>
                                 <div class="fw-bold text-dark small mt-1">
                                   <?= htmlspecialchars($prog['program_name']) ?>
                                 </div>
@@ -2715,6 +2753,15 @@ function getAdminStatusBadge($st) {
                       <td>
                         <div class="fw-bold text-dark fs-6">
                           <?= htmlspecialchars($prg['program_name']) ?>
+                        </div>
+                        <div class="mt-1">
+                          <?php if (($prg['program_type'] ?? '') === 'ทวิภาคี'): ?>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.72rem;"><i class="bi bi-briefcase me-1"></i>ทวิภาคี</span>
+                          <?php elseif (($prg['program_type'] ?? '') === 'ปกติและทวิภาคี'): ?>
+                            <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle" style="font-size: 0.72rem;"><i class="bi bi-arrow-repeat me-1"></i>ปกติ & ทวิภาคี</span>
+                          <?php else: ?>
+                            <span class="badge bg-light text-secondary border" style="font-size: 0.72rem;"><i class="bi bi-building me-1"></i>ปกติ</span>
+                          <?php endif; ?>
                         </div>
                       </td>
 
@@ -4242,6 +4289,19 @@ function getAdminStatusBadge($st) {
               </select>
             </div>
 
+            <!-- รูปแบบหลักสูตร / ระบบการเรียน -->
+            <div class="mb-3">
+              <label for="add_prog_type" class="form-label fw-semibold">
+                <i class="bi bi-briefcase me-1 text-danger"></i> รูปแบบหลักสูตร / ระบบการเรียน <span class="text-danger">*</span>
+              </label>
+              <select name="program_type" id="add_prog_type" class="form-select" required>
+                <option value="ปกติ" selected>ระบบปกติ (Normal / Regular)</option>
+                <option value="ทวิภาคี">ระบบทวิภาคี (Dual Vocational Education - ทวิ)</option>
+                <option value="ปกติและทวิภาคี">เปิดทั้งสองระบบ (ปกติ และ ทวิภาคี - ให้ผู้สมัครเลือก)</option>
+              </select>
+              <div class="form-text small text-muted">กำหนดให้ผู้สมัครสามารถเลือกเรียนแบบระบบปกติ หรือระบบทวิภาคีตามที่เปิดรับ</div>
+            </div>
+
             <!-- รหัสสาขา -->
             <div class="mb-3">
               <label for="add_prog_code" class="form-label fw-semibold">รหัสสาขาวิชา <span class="text-danger">*</span></label>
@@ -4339,6 +4399,19 @@ function getAdminStatusBadge($st) {
                 <option value="ปวส.">ระดับ ปวส. (ประกาศนียบัตรวิชาชีพชั้นสูง)</option>
                 <option value="ปริญญาตรี">ระดับ ปริญญาตรี (ทล.บ.)</option>
               </select>
+            </div>
+
+            <!-- รูปแบบหลักสูตร / ระบบการเรียน -->
+            <div class="mb-3">
+              <label for="edit_prog_type" class="form-label fw-semibold">
+                <i class="bi bi-briefcase me-1 text-danger"></i> รูปแบบหลักสูตร / ระบบการเรียน <span class="text-danger">*</span>
+              </label>
+              <select name="program_type" id="edit_prog_type" class="form-select" required>
+                <option value="ปกติ">ระบบปกติ (Normal / Regular)</option>
+                <option value="ทวิภาคี">ระบบทวิภาคี (Dual Vocational Education - ทวิ)</option>
+                <option value="ปกติและทวิภาคี">เปิดทั้งสองระบบ (ปกติ และ ทวิภาคี - ให้ผู้สมัครเลือก)</option>
+              </select>
+              <div class="form-text small text-muted">กำหนดให้ผู้สมัครสามารถเลือกเรียนแบบระบบปกติ หรือระบบทวิภาคีตามที่เปิดรับ</div>
             </div>
 
             <div class="mb-3">
@@ -5418,7 +5491,14 @@ function getAdminStatusBadge($st) {
       document.getElementById('modal_app_no').innerText = 'เลขที่ใบสมัคร: ' + (app.application_no || '-');
       document.getElementById('modal_name').innerText = (app.prefix || '') + (app.first_name || '') + ' ' + (app.last_name || '');
       document.getElementById('modal_citizen_id').innerText = app.citizen_id || '-';
-      document.getElementById('modal_level').innerText = (app.education_level || '-') + (app.pvs_type ? ' (' + app.pvs_type + ')' : '');
+      let levelInfo = app.education_level || '-';
+      if (app.curriculum_type) {
+        levelInfo += ' [' + app.curriculum_type + ']';
+      }
+      if (app.pvs_type) {
+        levelInfo += ' (' + app.pvs_type + ')';
+      }
+      document.getElementById('modal_level').innerText = levelInfo;
       document.getElementById('modal_program').innerText = (app.program_name || 'ไม่ระบุ') + (app.dept_name ? ' (' + app.dept_name + ')' : '');
       document.getElementById('modal_phone').innerText = app.phone || '-';
       document.getElementById('modal_email').innerText = app.email || '-';
@@ -5489,6 +5569,9 @@ function getAdminStatusBadge($st) {
     function openAddProgramForDept(deptId, eduLevel) {
       document.getElementById('add_prog_dept_id').value = deptId;
       document.getElementById('add_prog_edu_level').value = eduLevel;
+      if (document.getElementById('add_prog_type')) {
+        document.getElementById('add_prog_type').value = 'ปกติ';
+      }
       document.getElementById('add_prog_code').value = '';
       document.getElementById('add_prog_name').value = '';
       document.getElementById('add_prog_seats').value = 40;
@@ -5500,6 +5583,9 @@ function getAdminStatusBadge($st) {
     // เปิด Modal เพิ่มสาขาโดยระบุระดับชั้นล่วงหน้า
     function openAddProgramWithLevel(eduLevel) {
       document.getElementById('add_prog_edu_level').value = eduLevel;
+      if (document.getElementById('add_prog_type')) {
+        document.getElementById('add_prog_type').value = 'ปกติ';
+      }
       const modal = new bootstrap.Modal(document.getElementById('addProgramModal'));
       modal.show();
     }
@@ -5509,6 +5595,9 @@ function getAdminStatusBadge($st) {
       document.getElementById('edit_prog_id').value = prg.id || '';
       document.getElementById('edit_prog_dept_id').value = prg.dept_id || '';
       document.getElementById('edit_prog_edu_level').value = prg.education_level || 'ปวช.';
+      if (document.getElementById('edit_prog_type')) {
+        document.getElementById('edit_prog_type').value = prg.program_type || 'ปกติ';
+      }
       document.getElementById('edit_prog_code').value = prg.program_code || '';
       document.getElementById('edit_prog_name').value = prg.program_name || '';
       document.getElementById('edit_prog_seats').value = prg.seats_available || 40;
